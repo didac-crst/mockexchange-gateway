@@ -1,4 +1,4 @@
-# mockexchange-gateway
+# MockExchange Gateway
 Thin **CCXT-like** Python client for the `mockexchange_api` back-end. Provides a minimal surface for:
 - Market data (tickers)
 - Balance snapshots
@@ -11,8 +11,8 @@ Thin **CCXT-like** Python client for the `mockexchange_api` back-end. Provides a
 
 ## ✨ Why this exists
 You have:
-- **`mockexchange_api`** – the REST back-end (order matching, persistence, tickers cache).
-- **`mockexchange_deck`** – the Streamlit UI.
+- **`mockexchange-api`** – the REST back-end (order matching, persistence, tickers cache).
+- **`mockexchange-deck`** – the Streamlit UI.
 - **`mockexchange-gateway`** (this repo) – a *thin client* exposing CCXT-like method names so higher layers (strategies, backtests, scripts) remain swappable with real exchanges later.
 
 Keep the client *dumb*: all authoritative logic stays server-side.
