@@ -20,7 +20,7 @@ in a parallel module without breaking this sync API.
 """
 
 from __future__ import annotations
-import json
+from json import JSONDecodeError
 import logging
 from typing import Any, Mapping, Optional
 import requests
@@ -178,7 +178,7 @@ class HttpClient:
             return None
         try:
             return resp.json()  # Prefer structured data
-        except json.JSONDecodeError:
+        except JSONDecodeError:
             # Fallback: return raw text (debuggability > hard failure).
             return resp.text
 

@@ -18,7 +18,7 @@ Design Notes
 """
 
 from __future__ import annotations
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List
 
 
@@ -47,6 +47,7 @@ class Ticker(BaseModel):
       fields (e.g., high/low, vwap) until the API actually exposes them.
     """
 
+    model_config = {"populate_by_name": True}
     symbol: str
     timestamp: int
     bid: Optional[float] = None
@@ -55,9 +56,24 @@ class Ticker(BaseModel):
     bid_volume: Optional[float] = Field(None, alias="bidVolume")
     ask_volume: Optional[float] = Field(None, alias="askVolume")
 
-    class Config:
-        populate_by_name = True  # Allow exporting snake_case with .model_dump(by_alias=False)
-
+    @model_validator(mode="before")
+    def _coerce_timestamp(cls, values):
+        ts = values.get("timestamp")
+        if ts is not None:
+            # Accept string
+            if isinstance(ts, str):
+                try:
+                    ts = float(ts)
+                except ValueError:
+                    ts = None
+            if isinstance(ts, (int, float)):
+                # Convert seconds to ms if clearly seconds
+                if ts < 10**12:
+                    ts = int(ts * 1000)
+                else:
+                    ts = int(ts)
+                values["timestamp"] = ts
+        return values
 
 # ---------------------------------------------------------------------------
 # Balance Models
@@ -148,18 +164,48 @@ class Order(BaseModel):
     Server uses `oid`; we map it to `id` to mirror CCXT-style conventions.
     """
 
+    model_config = {"populate_by_name": True}
     id: str = Field(alias="oid")
     symbol: str
     side: str
     type: str
     status: str
-    price: float | None = None
+    ts_post: int
     amount: float
-    filled: float
-    remaining: float
+    price: float | None = None
+    filled: float | None = None
+    notion: float | None = None  # Alias for `cost` in some APIs
     cost: float | None = None
-    created_at: int
+    remaining: float | None = None  # Computed field, not in server payload
+    created_at: int | None = None
     updated_at: int | None = None
+    ts_exec: int | None = None
 
-    class Config:
-        allow_population_by_field_name = True  # Allows constructing with id=... in tests if desired.
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Compute remaining amount if not provided
+        self._register_created_at()
+        self._register_updated_at()
+        self._register_cost()
+        self._calculate_remaining()
+    
+    def _register_created_at(self):
+        """Register the creation timestamp."""
+        self.created_at = self.ts_post
+        del self.ts_post
+    
+    def _register_updated_at(self):
+        """Register the last updated timestamp."""
+        self.updated_at = self.ts_exec
+        del self.ts_exec
+    
+    def _register_cost(self):
+        """Register the cost if not provided."""
+        self.cost = self.notion
+        del self.notion
+    
+
+    def _calculate_remaining(self):
+        """Calculate remaining amount based on filled and total amount."""
+        if self.filled is not None and self.amount is not None:
+            self.remaining = self.amount - self.filled

@@ -22,6 +22,7 @@ with identical public method names for easy substitution.
 
 from __future__ import annotations
 from typing import Any, Mapping, Iterable
+import time
 
 from .client import HttpClient
 from .models import Ticker, Order
@@ -70,6 +71,22 @@ class MockExchangeGateway:
         self._markets_cache: set[str] = set()
 
     # ---------------------------------------------------------------------
+    # Helper Methods
+    # ---------------------------------------------------------------------
+
+    def _unwrap_symbol_mapping(self, payload, symbol: str):
+        """Extract a single symbol's data from a mapping response."""
+        if isinstance(payload, dict) and symbol in payload:
+            return payload[symbol]
+        return payload
+    
+    @staticmethod
+    def _current_timestamp() -> int:
+        """Return the current timestamp in milliseconds."""
+        # Use time.time() to get the current time in seconds, then convert to milliseconds.
+        return int(time.time() * 1000)
+
+    # ---------------------------------------------------------------------
     # Markets
     # ---------------------------------------------------------------------
     def load_markets(self) -> list[str]:
@@ -87,7 +104,7 @@ class MockExchangeGateway:
         the back-end. Expanding to richer metadata remains trivial later.
         """
         data = self._http.get("/tickers")
-        self._markets_cache = {d["symbol"] for d in data}
+        self._markets_cache = {d:{"symbol":d} for d in data}
         return sorted(self._markets_cache)
 
     def fetch_markets(self) -> list[dict[str, Any]]:
@@ -153,6 +170,33 @@ class MockExchangeGateway:
         """
         symbol = normalize_symbol(symbol)
         raw = self._http.get(f"/tickers/{symbol}")
+        raw = self._unwrap_symbol_mapping(raw, symbol)
+        if not raw:
+            raise ValueError(f"No ticker data found for symbol '{symbol}'")
+        if isinstance(raw, str):
+            # If the API returns a string (e.g. "Not found"), we raise an error.
+            raise ValueError(f"Unexpected response for ticker '{symbol}': {raw}")
+        if not isinstance(raw, dict):
+            # If the API returns a non-dict type, we raise an error.
+            raise ValueError(f"Unexpected response type for ticker '{symbol}': {type(raw)}")
+        if "symbol" not in raw:
+            # If the symbol is not in the response, we raise an error.
+            raise ValueError(f"Ticker response for '{symbol}' does not contain 'symbol' field.")
+        if raw["symbol"] != symbol:
+            # If the symbol in the response does not match the requested symbol, we raise an error.
+            raise ValueError(f"Ticker response for '{symbol}' has mismatched 'symbol' field: {raw['symbol']}")
+        # If we reach here, the response is valid and we can return the normalized ticker.
+        # Note: We use model_dump() to ensure we return a dict with snake_case keys
+        # even if the API returns camelCase or mixed-case keys.
+        # This ensures consistent API surface for consumers.
+        # print(f"Fetched ticker for {symbol}: {raw}")  # Uncomment for debugging
+        # Uncomment the line above to see the raw response in debug logs.
+        # print("Raw ticker data:", raw)  # Uncomment for debugging
+        # Uncomment the line above to see the raw response in debug logs.
+        # print("Normalized ticker data:", Ticker(**raw).model_dump())  # Uncomment for debugging
+        # Uncomment the line above to see the normalized response in debug logs.
+        # print("Returning normalized ticker data:", raw)  # Uncomment for debugging
+        # Uncomment the line above to see the final response before returning.
         return Ticker(**raw).model_dump()
 
     def fetch_tickers(self, symbols: Iterable[str] | None = None) -> dict[str, dict]:
@@ -174,12 +218,23 @@ class MockExchangeGateway:
         We intentionally **do not** issue multiple network calls for each symbol
         to keep latency low; the back-end already returns the full cache.
         """
-        data = self._http.get("/tickers")
-        tickers = {row["symbol"]: Ticker(**row).model_dump() for row in data}
+        # We need to know all the symbols available in the exchange to filter correctly.
+        exchange_symbols = self._http.get("/tickers")
         if symbols:
             symbols_set = {normalize_symbol(s) for s in symbols}
-            tickers = {k: v for k, v in tickers.items() if k in symbols_set}
-        return tickers
+            # Filter the exchange symbols to only those requested.
+            # This is a client-side filter to avoid multiple network calls.
+            symbols_list = [s for s in exchange_symbols if s in symbols_set]
+        else:
+            symbols_list = exchange_symbols
+        if not symbols_list:
+            raise ValueError("No symbols provided; cannot fetch tickers without symbols.")
+        # Create a string of symbols to pass to the API.
+        # This is a single network call to fetch all tickers at once.
+        symbols_list_str = ",".join(symbols_list)
+        tickers_list = self._http.get(f"/tickers/{symbols_list_str}")
+        Tickers_dict = {s: Ticker(**t).model_dump() for s, t in tickers_list.items()}
+        return Tickers_dict
 
     # ---------------------------------------------------------------------
     # Balance
@@ -206,7 +261,7 @@ class MockExchangeGateway:
         """
         raw = self._http.get("/balance")
         assets = raw.get("assets", [])
-        result: dict[str, Any] = {"info": raw, "timestamp": raw.get("timestamp")}
+        result: dict[str, Any] = {"info": raw, "timestamp": raw.get("timestamp", self._current_timestamp())}
         for a in assets:
             asset = a["asset"]
             result[asset] = {
@@ -240,7 +295,7 @@ class MockExchangeGateway:
             `"buy"` or `"sell"`.
         amount:
             Base asset amount.
-        price:
+        limit_price:
             Required for limit orders; ignored for pure market.
         params:
             Extra fields to forward verbatim (future extension point).
@@ -262,7 +317,7 @@ class MockExchangeGateway:
             "amount": amount,
         }
         if price is not None:
-            body["price"] = price
+            body["limit_price"] = price
         if params:
             body.update(params)
         raw = self._http.post("/orders", json=body)
@@ -365,7 +420,8 @@ class MockExchangeGateway:
         current state; we simply propagate that.
         """
         raw = self._http.post(f"/orders/{order_id}/cancel")
-        return Order(**raw).model_dump()
+        order_data = raw['canceled_order']
+        return Order(**order_data).model_dump()
 
     # ---------------------------------------------------------------------
     # Dry-run / balance check
