@@ -22,7 +22,7 @@ Keep the client *dumb*: all authoritative logic stays server-side.
 ## 🧱 Install
 
 ```bash
-pip install git+https://github.com/didac-crst/mockexchange_gateway.git
+pip install git+https://github.com/didac-crst/mockexchange-gateway.git
 ```
 
 (Or add to `pyproject.toml` / `requirements.txt` as a VCS dependency.)
