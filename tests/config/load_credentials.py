@@ -4,9 +4,13 @@
 This script loads credentials from the local_credentials.py file and
 sets them as environment variables for integration tests.
 
+"""
 Usage:
+    # Option A: Export to current shell
+    eval "$(python tests/config/load_credentials.py --print-exports)"
+
+    # Option B: Just validate loading (env set only for this process)
     python tests/config/load_credentials.py
-    # Then run: make test-integration
 """
 
 import os
