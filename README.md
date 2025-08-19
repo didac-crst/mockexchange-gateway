@@ -178,7 +178,7 @@ my_strategy(prod_gateway)   # Live trading
 
 > **⚠️ Prerequisite**: This gateway requires a running MockExchange Engine. See the [MockExchange Suite](https://github.com/didac-crst/mockexchange) for setup instructions.
 
-#### **📦 **From GitHub Repository**
+#### 📦 **From GitHub Repository**
 
 ```bash
 # Clone the repository
@@ -192,7 +192,7 @@ make install-poetry
 make install-dev
 ```
 
-#### **📦 **Using Poetry (Recommended)**
+#### 📦 **Using Poetry (Recommended)**
 
 ```bash
 # Install Poetry first (if not already installed)
@@ -205,7 +205,7 @@ poetry install
 poetry add mockexchange-gateway
 ```
 
-#### **📦 **Using pip (Standard)**
+#### 📦 **Using pip (Standard)**
 
 ```bash
 # Install from GitHub
@@ -243,9 +243,9 @@ ticker = gateway.fetch_ticker("BTC/USDT")
 balance = gateway.fetch_balance()
 order = gateway.create_order("BTC/USDT", "market", "buy", 0.001)
 
-# Get all available tickers (MockExchange returns all 500+ symbols)
+# Get all available tickers (MockExchange returns all symbols it has)
 all_tickers = gateway.fetch_tickers()
-print(f"Available symbols: {len(all_tickers)}")  # Returns ~538 symbols
+print(f"Available symbols: {len(all_tickers)}")
 
 # Get specific tickers
 btc_eth_tickers = gateway.fetch_tickers(['BTC/USDT', 'ETH/USDT'])
@@ -274,7 +274,13 @@ order = gateway.create_order("BTC/USDT", "market", "buy", 0.001)
 
 ## 🎯 **Best Practices: Seamless Mode Switching**
 
+The key to successful mode switching is writing code that works identically in both paper and production modes. Here are proven patterns to achieve this:
+
 ### **1. 📝 Write Exchange-Agnostic Code**
+
+**Goal**: Create functions that work with ANY gateway, regardless of whether it's connected to MockExchange or a real exchange.
+
+**Why this matters**: Your trading logic should be independent of the backend. This allows you to test with MockExchange and deploy to production without changing your strategy code.
 
 ```python
 def my_trading_strategy(gateway):
@@ -296,6 +302,10 @@ def my_trading_strategy(gateway):
 ```
 
 ### **2. 🔧 Environment-Based Configuration**
+
+**Goal**: Automatically choose the right mode based on your environment (development, staging, production).
+
+**Why this matters**: You don't want to manually change code when moving between environments. This pattern automatically selects paper mode for development and production mode for live trading.
 
 ```python
 import os
@@ -326,6 +336,10 @@ result = my_trading_strategy(gateway)
 ```
 
 ### **3. 🧪 Testing Strategy**
+
+**Goal**: Test your strategies safely in both paper and production modes to ensure they work correctly before going live.
+
+**Why this matters**: You want to catch issues early and verify your strategy behaves the same way in both environments. Paper mode lets you test without risk, while production mode (with testnet) validates real exchange behavior.
 
 ```python
 def test_strategy_with_paper_mode():
@@ -365,6 +379,10 @@ def test_strategy_with_production_mode():
 
 ### **4. 🚀 Deployment Workflow**
 
+**Goal**: Create a clear progression from development to production with appropriate testing at each stage.
+
+**Why this matters**: You need confidence that your strategy works correctly before risking real money. This workflow ensures you test thoroughly in each environment before moving to the next.
+
 ```python
 # development.py - Local development
 gateway = ExchangeFactory.create_paper_gateway(
@@ -390,6 +408,10 @@ gateway = ExchangeFactory.create_prod_gateway(
 ```
 
 ### **5. 🛡️ Error Handling Best Practices**
+
+**Goal**: Handle errors gracefully so your application doesn't crash when features aren't available or when network issues occur.
+
+**Why this matters**: Different modes have different capabilities, and real exchanges can have temporary issues. Robust error handling ensures your application continues working even when problems arise.
 
 ```python
 from mockexchange_gateway import NotSupported, ExchangeError
@@ -422,6 +444,10 @@ def robust_trading_function(gateway):
 ```
 
 ### **6. 📊 Capability Checking**
+
+**Goal**: Adapt your strategy based on what features are available in the current mode, providing fallbacks when advanced features aren't supported.
+
+**Why this matters**: Paper mode has limited features compared to production mode. This pattern allows your strategy to work optimally in both environments by using the best available features.
 
 ```python
 def adaptive_trading_strategy(gateway):
