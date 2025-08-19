@@ -108,7 +108,7 @@ Error: fetchOHLCV not supported in paper mode (MockExchange backend)
 
 ### **Change MockExchange URL:**
 ```python
-gateway = create_paper_gateway(
+gateway = ExchangeFactory.create_paper_gateway(
     base_url="http://your-mockexchange-url:8000",
     api_key="your-api-key"
 )
@@ -116,7 +116,7 @@ gateway = create_paper_gateway(
 
 ### **Use Different Exchange:**
 ```python
-gateway = create_prod_gateway(
+gateway = ExchangeFactory.create_prod_gateway(
     exchange_id="coinbase",  # or 'kraken', 'kucoin', etc.
     api_key="your-api-key",
     secret="your-secret",

@@ -37,7 +37,7 @@ A clear and concise description of what actually happened.
 
 ```python
 # Your gateway configuration (remove sensitive data)
-gateway = create_paper_gateway(
+gateway = ExchangeFactory.create_paper_gateway(
     base_url="http://localhost:8000",
     api_key="dev-key"
 )

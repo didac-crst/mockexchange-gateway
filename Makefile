@@ -150,7 +150,7 @@ env-setup:
 health: env-setup
 	@echo "Running health checks..."
 	@python -c "import mockexchange_gateway; print('✅ Import successful')"
-	@python -c "from mockexchange_gateway import create_paper_gateway; print('✅ Factory import successful')"
+	@python -c "from mockexchange_gateway import ExchangeFactory; print('✅ Factory import successful')"
 	@echo "Health checks passed!"
 
 # Release management

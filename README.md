@@ -525,7 +525,7 @@ all_tickers = data_exchange.fetch_tickers()
 ### Capability Detection
 
 ```python
-gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+gateway = ExchangeFactory.create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 
 # Check what's supported
 if gateway.has["fetchOHLCV"]:
@@ -622,21 +622,28 @@ can_execute = gateway.can_execute_order("BTC/USDT", "market", "buy", 0.001)  # D
 ```
 
 **Note:** MockExchange-specific methods are clearly documented and not part of standard CCXT.
-```
 
 ## 🔄 Mode Switching Examples
 
+**Goal**: Demonstrate how to seamlessly switch between paper and production modes with the same code.
+
+**Why this matters**: The core value of MockX Gateway is that your trading strategies work identically in both environments. These examples show you how to achieve this.
+
 ### Development Workflow
+
+**Goal**: Show the typical development → production progression using the same strategy code.
+
+**Why this matters**: You want to develop and test safely with MockExchange, then deploy to production without changing your trading logic.
 
 ```python
 # 1. Development: Use MockExchange
-dev_gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+dev_gateway = ExchangeFactory.create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 
 # Test your strategy
 dev_gateway.create_order("BTC/USDT", "market", "buy", 0.001)
 
 # 2. Production: Use real exchange
-prod_gateway = create_prod_gateway(
+prod_gateway = ExchangeFactory.create_prod_gateway(
     exchange_id="binance",
     api_key="your_key",
     secret="your_secret"
@@ -647,6 +654,10 @@ prod_gateway.create_order("BTC/USDT", "market", "buy", 0.001)
 ```
 
 ### Strategy Testing
+
+**Goal**: Demonstrate that the same strategy function works with both paper and production gateways.
+
+**Why this matters**: This is the key benefit - write once, test safely, deploy confidently.
 
 ```python
 def my_trading_strategy(gateway):
@@ -676,7 +687,15 @@ result = my_trading_strategy(prod_gateway)
 
 ## 🛠️ Development
 
+**Goal**: Provide everything needed to set up and contribute to the MockX Gateway project.
+
+**Why this matters**: Whether you're using the library or contributing to it, you need clear setup instructions and development tools.
+
 ### Setup
+
+**Goal**: Get the development environment ready with all necessary tools and dependencies.
+
+**Why this matters**: Proper setup ensures consistent development experience and prevents common issues.
 
 ```bash
 # Clone and setup
@@ -697,6 +716,10 @@ make health
 ```
 
 ### Common Commands
+
+**Goal**: Provide quick reference for all development tasks and quality checks.
+
+**Why this matters**: Having all commands in one place makes development faster and ensures consistent workflows.
 
 ```bash
 # Code quality
@@ -787,9 +810,9 @@ except OrderNotFound as e:
 ### Context Manager
 
 ```python
-from mockexchange_gateway import create_paper_gateway
+from mockexchange_gateway import ExchangeFactory
 
-with create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key") as gateway:
+with ExchangeFactory.create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key") as gateway:
     # Gateway automatically closes when done
     ticker = gateway.fetch_ticker("BTC/USDT")
     # ... rest of your code
@@ -849,10 +872,10 @@ Error: fetchOHLCV not supported in paper mode (MockExchange backend)
 
 #### **1. Installation Test (No Dependencies)**
 ```python
-from mockexchange_gateway import create_paper_gateway, NotSupported
+from mockexchange_gateway import ExchangeFactory, NotSupported
 
 # Test gateway creation
-gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="test-key")
+gateway = ExchangeFactory.create_paper_gateway(base_url="http://localhost:8000", api_key="test-key")
 print(f"✅ Gateway created: {gateway}")
 print(f"✅ Capabilities: {len(gateway.has)} features")
 

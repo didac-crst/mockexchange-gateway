@@ -24,7 +24,7 @@ Describe a specific use case where this feature would be valuable:
 
 ```python
 # Example usage
-gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+gateway = ExchangeFactory.create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 
 # New feature usage
 result = gateway.new_feature_method()
