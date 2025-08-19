@@ -177,8 +177,11 @@ class Capabilities:
             else:
                 print('OHLCV not available in this mode')
         """
-        return self._capabilities.get(feature, False)
-
+        top_level = self._capabilities.get(feature, False)
+        if isinstance(top_level, bool) and top_level:
+            return True
+        nested_has = self._capabilities.get("has", {})
+        return bool(nested_has.get(feature, False))
     def get_has_dict(self) -> Dict[str, bool]:
         """Get the CCXT-style 'has' dict."""
         # Return all capabilities, not just the nested 'has' dict
