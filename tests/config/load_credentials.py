@@ -30,6 +30,20 @@ try:
         MOCKX_BASE_URL,
     )
 
+    if args.print_exports:
+        print(f'export MOCKX_BASE_URL="{MOCKX_BASE_URL}"')
+        print(f'export MOCKX_API_KEY="{MOCKX_API_KEY}"')
+        print(f'export EXCHANGE_ID="{EXCHANGE_ID}"')
+        print(f'export EXCHANGE_API_KEY="{EXCHANGE_API_KEY}"')
+        print(f'export EXCHANGE_SECRET="{EXCHANGE_SECRET}"')
+        sys.exit(0)
+
+    # Set environment variables
+    os.environ["MOCKX_BASE_URL"] = MOCKX_BASE_URL
+    os.environ["MOCKX_API_KEY"] = MOCKX_API_KEY
+    os.environ["EXCHANGE_ID"] = EXCHANGE_ID
+    os.environ["EXCHANGE_API_KEY"] = EXCHANGE_API_KEY
+    os.environ["EXCHANGE_SECRET"] = EXCHANGE_SECRET
     # Set environment variables
     os.environ["MOCKX_BASE_URL"] = MOCKX_BASE_URL
     os.environ["MOCKX_API_KEY"] = MOCKX_API_KEY
