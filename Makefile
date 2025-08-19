@@ -167,7 +167,27 @@ release-branch: ## Create a new release branch (interactive)
 		*) echo "Invalid choice"; exit 1 ;; \
 	esac
 
-release: ## Build and publish release
+release: ## Create a new release (bump version, tag, push)
+	@echo "Creating new release..."
+	@bash scripts/create-release.sh
+
+release-patch: ## Create a patch release (0.1.0 -> 0.1.1)
+	@echo "Creating patch release..."
+	@bash scripts/create-release.sh --type patch
+
+release-minor: ## Create a minor release (0.1.0 -> 0.2.0)
+	@echo "Creating minor release..."
+	@bash scripts/create-release.sh --type minor
+
+release-major: ## Create a major release (0.1.0 -> 1.0.0)
+	@echo "Creating major release..."
+	@bash scripts/create-release.sh --type major
+
+check-release: ## Run quality checks for release
+	@echo "Running release quality checks..."
+	@bash scripts/create-release.sh --check-only
+
+release-build: ## Build and publish release
 	@echo "Building release..."
 	$(MAKE) clean
 	$(MAKE) build

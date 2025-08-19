@@ -1,0 +1,150 @@
+name: Draft Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Run tests
+        run: |
+          poetry run make test
+          poetry run make lint
+          poetry run make type-check
+
+      - name: Build package
+        run: poetry build
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$GITHUB_REF" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last tag
+          if git describe --tags --abbrev=0 HEAD~1 >/dev/null 2>&1; then
+            PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1)
+            CHANGELOG=$(git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s" --reverse)
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          release_name: MockX Gateway ${{ steps.version.outputs.version }}
+          body: |
+            ## 🚀 Release Summary
+            
+            MockX Gateway ${{ steps.version.outputs.version }} is now available!
+            
+            ## 📋 What's New
+            
+            ### ✨ Key Changes
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ## 📦 Installation
+            
+            ### From PyPI (Recommended)
+            ```bash
+            pip install mockexchange-gateway==${{ steps.version.outputs.version }}
+            ```
+            
+            ### From GitHub
+            ```bash
+            pip install git+https://github.com/didac-crst/mockexchange-gateway.git@${{ steps.version.outputs.tag }}
+            ```
+            
+            ### With Poetry
+            ```bash
+            poetry add mockexchange-gateway@${{ steps.version.outputs.version }}
+            ```
+            
+            ## 🧪 Testing
+            
+            All tests pass:
+            - ✅ Unit tests
+            - ✅ Linting
+            - ✅ Type checking
+            - ✅ Build verification
+            
+            ## 📊 Compatibility
+            
+            - ✅ Python 3.12+
+            - ✅ CCXT API compatibility
+            - ✅ MockExchange Engine integration
+            
+            ## 📞 Support
+            
+            - 📖 [Documentation](https://github.com/didac-crst/mockexchange-gateway#readme)
+            - 🐛 [Bug Reports](https://github.com/didac-crst/mockexchange-gateway/issues)
+            - 💡 [Feature Requests](https://github.com/didac-crst/mockexchange-gateway/issues)
+            
+            ---
+            
+            **Release Date**: $(date -u +"%Y-%m-%d")  
+            **Version**: ${{ steps.version.outputs.version }}  
+            **Commit**: ${{ github.sha }}
+          draft: true
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/mockexchange_gateway-${{ steps.version.outputs.version }}-py3-none-any.whl
+          asset_name: mockexchange_gateway-${{ steps.version.outputs.version }}-py3-none-any.whl
+          asset_content_type: application/zip
+
+      - name: Upload Source Distribution
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/mockexchange_gateway-${{ steps.version.outputs.version }}.tar.gz
+          asset_name: mockexchange_gateway-${{ steps.version.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
