@@ -48,15 +48,14 @@ A clear and concise description of any alternative solutions or features you've 
 
 ## Impact Assessment
 
-### Breaking Changes
+### Breaking changes
 - [ ] No breaking changes
 - [ ] Breaking changes required (explain below)
 
-### Performance Impact
+### Performance impact
 - [ ] No performance impact
 - [ ] Performance improvement
 - [ ] Performance cost (explain below)
-
 ## Additional Context
 
 Add any other context, screenshots, or examples about the feature request here.
