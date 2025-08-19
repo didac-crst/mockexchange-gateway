@@ -261,13 +261,19 @@ MOCKX_SANDBOX=false                # true for testnet
 
 ```python
 import os
-from mockexchange_gateway import create_gateway
+from mockexchange_gateway import create_paper_gateway, create_prod_gateway
 
 # Automatically choose based on environment
 use_mock = os.getenv('ENVIRONMENT') != 'production'
-os.environ["MOCKX_MODE"] = "paper" if use_mock else "prod"
 
-gateway = create_gateway()
+if use_mock:
+    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+else:
+    gateway = create_prod_gateway(
+        exchange_id="binance",
+        api_key=os.getenv('EXCHANGE_API_KEY'),
+        secret=os.getenv('EXCHANGE_SECRET')
+    )
 # Your code works the same regardless of mode
 ```
 
@@ -295,7 +301,7 @@ gateway = create_gateway()
 ### Capability Detection
 
 ```python
-gateway = create_gateway()
+gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 
 # Check what's supported
 if gateway.has["fetchOHLCV"]:
@@ -387,18 +393,17 @@ can_execute = gateway.can_execute_order("BTC/USDT", "market", "buy", 0.001)  # D
 
 ```python
 # 1. Development: Use MockExchange
-os.environ["MOCKX_MODE"] = "paper"
-dev_gateway = create_gateway()
+dev_gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 
 # Test your strategy
 dev_gateway.create_order("BTC/USDT", "market", "buy", 0.001)
 
 # 2. Production: Use real exchange
-os.environ["MOCKX_MODE"] = "prod"
-os.environ["BINANCE_API_KEY"] = "your_key"
-os.environ["BINANCE_API_SECRET"] = "your_secret"
-
-prod_gateway = create_gateway()
+prod_gateway = create_prod_gateway(
+    exchange_id="binance",
+    api_key="your_key",
+    secret="your_secret"
+)
 
 # Same code, real trading
 prod_gateway.create_order("BTC/USDT", "market", "buy", 0.001)
@@ -417,7 +422,7 @@ def my_trading_strategy(gateway):
     return None
 
 # Test with MockExchange
-paper_gateway = create_paper_gateway()
+paper_gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 result = my_trading_strategy(paper_gateway)
 
 # Deploy to production (same code!)
@@ -538,9 +543,9 @@ except OrderNotFound as e:
 ### Context Manager
 
 ```python
-from mockexchange_gateway import create_gateway
+from mockexchange_gateway import create_paper_gateway
 
-with create_gateway() as gateway:
+with create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key") as gateway:
     # Gateway automatically closes when done
     ticker = gateway.fetch_ticker("BTC/USDT")
     # ... rest of your code

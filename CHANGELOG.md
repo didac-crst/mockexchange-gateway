@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gateway factory (`factory.py`)
 
 #### Factory Functions
-- `create_gateway()` - Environment-based gateway creation
+- `create_paper_gateway()` and `create_prod_gateway()` - Constructor-based gateway creation
 - `create_paper_gateway()` - Direct MockExchange gateway
 - `create_prod_gateway()` - Direct CCXT gateway
 
