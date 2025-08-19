@@ -17,29 +17,19 @@
 - [⚠️ Important: MockExchange Engine Required](#️-important-mockexchange-engine-required)
 - [✨ Key Features](#-key-features)
 - [🏗️ Architecture](#️-architecture)
+- [🧠 Architecture Explained (For Dummies)](#-architecture-explained-for-dummies)
 - [🚀 Quick Start](#-quick-start)
-  - [Installation](#installation)
-  - [Test & Examples](#test--examples)
-  - [Basic Usage](#basic-usage)
-  - [Production Mode](#production-mode)
-  - [Using the Factory Class](#using-the-factory-class)
-- [⚙️ Configuration](#️-configuration)
-  - [Environment Variables](#environment-variables)
-  - [Environment-Based Switching](#environment-based-switching)
+- [🎯 Best Practices: Seamless Mode Switching](#-best-practices-seamless-mode-switching)
 - [📋 Capabilities Matrix](#-capabilities-matrix)
-  - [Capability Detection](#capability-detection)
 - [🔧 MockExchange API Compatibility](#-mockexchange-api-compatibility)
-  - [Understanding MockExchange's API Behavior](#understanding-mockexchanges-api-behavior)
 - [🔄 Mode Switching Examples](#-mode-switching-examples)
-  - [Development Workflow](#development-workflow)
-  - [Strategy Testing](#strategy-testing)
 - [🛠️ Development](#️-development)
-  - [Setup](#setup)
-  - [Common Commands](#common-commands)
-  - [Project Structure](#project-structure)
+- [🔧 Advanced Usage](#-advanced-usage)
 - [📚 Examples & Use Cases](#-examples--use-cases)
+- [🧪 Testing Strategy](#-testing-strategy)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
 
 ## 🎯 Overview
 
@@ -509,53 +499,7 @@ all_tickers = data_exchange.fetch_tickers()
 
 **Result**: One-flag swap for execution, full CCXT breadth for analytics, no capability surprises! 🎯
 
-## ⚙️ Configuration
 
-### Constructor-Based Configuration
-
-The gateway uses explicit constructor-based configuration for better library design:
-
-```python
-# Paper mode (MockExchange)
-gateway = create_paper_gateway(
-    base_url="http://localhost:8000",
-    api_key="dev-key",
-    timeout=10.0
-)
-
-# Production mode (Real Exchange)
-gateway = create_prod_gateway(
-    exchange_id="binance",  # or 'coinbase', 'kraken', etc.
-    api_key="your-api-key",
-    secret="your-secret-key",
-    sandbox=True  # Use testnet for safety
-)
-```
-
-### Environment-Based Switching
-
-For applications that need to switch modes based on environment:
-
-```python
-import os
-from mockexchange_gateway import ExchangeFactory
-
-# Automatically choose based on environment
-use_mock = os.getenv('ENVIRONMENT') != 'production'
-
-if use_mock:
-    gateway = ExchangeFactory.create_paper_gateway(
-        base_url="http://localhost:8000", 
-        api_key="dev-key"
-    )
-else:
-    gateway = ExchangeFactory.create_prod_gateway(
-        exchange_id="binance",
-        api_key=os.getenv('EXCHANGE_API_KEY'),
-        secret=os.getenv('EXCHANGE_SECRET')
-    )
-# Your code works the same regardless of mode
-```
 
 ## 📋 Capabilities Matrix
 
