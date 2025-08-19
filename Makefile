@@ -22,9 +22,10 @@ help:
 	@echo "  type-check   - Run type checking with mypy"
 	@echo ""
 	@echo "Build & Release:"
-	@echo "  clean        - Clean build artifacts"
-	@echo "  build        - Build the package"
-	@echo "  publish      - Build and publish to PyPI"
+@echo "  clean        - Clean build artifacts"
+@echo "  build        - Build the package"
+@echo "  release      - Run quality checks for GitHub release"
+@echo "  publish      - Build and publish to PyPI"
 	@echo ""
 	@echo "Documentation:"
 	@echo "  docs         - Build documentation"
@@ -167,25 +168,23 @@ release-branch: ## Create a new release branch (interactive)
 		*) echo "Invalid choice"; exit 1 ;; \
 	esac
 
-release: ## Create a new release (bump version, tag, push)
-	@echo "Creating new release..."
-	@bash scripts/create-release.sh
-
-release-patch: ## Create a patch release (0.1.0 -> 0.1.1)
-	@echo "Creating patch release..."
-	@bash scripts/create-release.sh --type patch
-
-release-minor: ## Create a minor release (0.1.0 -> 0.2.0)
-	@echo "Creating minor release..."
-	@bash scripts/create-release.sh --type minor
-
-release-major: ## Create a major release (0.1.0 -> 1.0.0)
-	@echo "Creating major release..."
-	@bash scripts/create-release.sh --type major
-
-check-release: ## Run quality checks for release
-	@echo "Running release quality checks..."
-	@bash scripts/create-release.sh --check-only
+release: ## Run quality checks for release preparation
+	@echo "Running quality checks for release..."
+	@echo "✅ Tests..."
+	@$(MAKE) test
+	@echo "✅ Linting..."
+	@$(MAKE) lint
+	@echo "✅ Type checking..."
+	@$(MAKE) type-check
+	@echo "✅ Formatting..."
+	@$(MAKE) format
+	@echo "✅ Building..."
+	@$(MAKE) build-poetry
+	@echo "🎉 All checks passed! Ready for GitHub release."
+	@echo "Next steps:"
+	@echo "  1. Create release on GitHub"
+	@echo "  2. Use the release template"
+	@echo "  3. GitHub workflow will handle the rest"
 
 release-build: ## Build and publish release
 	@echo "Building release..."
