@@ -77,6 +77,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           release_name: MockX Gateway ${{ steps.version.outputs.version }}
           body: |
+body: |
             ## 🚀 Release Summary
             
             MockX Gateway ${{ steps.version.outputs.version }} is now available!
@@ -89,46 +90,6 @@ jobs:
             ## 📦 Installation
             
             ### From PyPI (Recommended)
-            ```bash
-            pip install mockexchange-gateway==${{ steps.version.outputs.version }}
-            ```
-            
-            ### From GitHub
-            ```bash
-            pip install git+https://github.com/didac-crst/mockexchange-gateway.git@${{ steps.version.outputs.tag }}
-            ```
-            
-            ### With Poetry
-            ```bash
-            poetry add mockexchange-gateway@${{ steps.version.outputs.version }}
-            ```
-            
-            ## 🧪 Testing
-            
-            All tests pass:
-            - ✅ Unit tests
-            - ✅ Linting
-            - ✅ Type checking
-            - ✅ Build verification
-            
-            ## 📊 Compatibility
-            
-            - ✅ Python 3.12+
-            - ✅ CCXT API compatibility
-            - ✅ MockExchange Engine integration
-            
-            ## 📞 Support
-            
-            - 📖 [Documentation](https://github.com/didac-crst/mockexchange-gateway#readme)
-            - 🐛 [Bug Reports](https://github.com/didac-crst/mockexchange-gateway/issues)
-            - 💡 [Feature Requests](https://github.com/didac-crst/mockexchange-gateway/issues)
-            
-            ---
-            
-            **Release Date**: $(date -u +"%Y-%m-%d")  
-            **Version**: ${{ steps.version.outputs.version }}  
-            **Commit**: ${{ github.sha }}
-          draft: true
           prerelease: false
 
       - name: Upload Release Assets
