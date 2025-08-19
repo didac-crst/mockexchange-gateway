@@ -2,45 +2,96 @@
 
 Pytest configuration & reusable fixtures.
 
-Why fixtures here?
-------------------
-Placing shared fixtures in `conftest.py` (auto-discovered by pytest) lets
-all test modules import them implicitly without repetitive import lines.
-This keeps individual test files lean and focused on assertions.
-
-Provided Fixtures
------------------
-backend : InMemoryBackend
-    An isolated in-memory mock exchange populated with a BTC/USDT ticker.
-gateway : MockExchangeGateway
-    Gateway wired to the in-memory backend (no real HTTP).
+This module provides shared fixtures and configuration for both unit and
+integration tests in the MockX Gateway test suite.
 """
 
 import pytest
-from mockexchange_gateway.ccxt_like import MockExchangeGateway
-from mockexchange_gateway.backends import InMemoryBackend
+
+from mockexchange_gateway import ExchangeFactory
+from tests.helpers.credentials import get_integration_config
+
+
+def pytest_addoption(parser):
+    """Add custom command line options for pytest."""
+    parser.addoption(
+        "--integration",
+        action="store_true",
+        default=False,
+        help="Run integration tests (requires API credentials)",
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify test collection based on command line options."""
+    if config.getoption("--integration"):
+        # Running with --integration flag, don't skip integration tests
+        return
+
+    # Not running integration tests, skip them
+    skip_integration = pytest.mark.skip(reason="need --integration option to run")
+    for item in items:
+        if "integration" in item.keywords:
+            item.add_marker(skip_integration)
 
 
 @pytest.fixture
-def backend():
-    """Return a pre-seeded in-memory backend.
+def paper_gateway():
+    """Create a paper mode gateway for testing.
 
-    Seeding a deterministic ticker (BTC/USDT @ 50_000) ensures:
-        * Order cost calculations are predictable (cost = amount * 50_000).
-        * Tests remain stable across runs (no random price variance).
-    We also set bid/ask explicitly to exercise code that might rely on them.
+    This fixture creates a gateway connected to a test MockExchange instance.
+    It's suitable for unit tests that don't require real API credentials.
     """
-    be = InMemoryBackend()
-    be.set_ticker("BTC/USDT", last=50000, bid=49990, ask=50010)
-    return be
+    return ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="test-key", timeout=5.0
+    )
 
 
 @pytest.fixture
-def gateway(backend):
-    """Gateway fixture bound to the in-memory backend.
+def integration_config():
+    """Get integration test configuration from environment.
 
-    Dependency injection via `http_client=backend` avoids making real network
-    calls and speeds up tests dramatically. Any test receiving `gateway`
-    automatically also benefits from the pre-seeded ticker in `backend`.
+    This fixture provides API credentials and configuration for integration
+    tests. It will be None if credentials are not available.
     """
-    return MockExchangeGateway(http_client=backend)
+    return get_integration_config()
+
+
+@pytest.fixture
+def integration_paper_gateway(integration_config):
+    """Create a paper mode gateway with real MockExchange credentials.
+
+    This fixture creates a gateway connected to a real MockExchange instance
+    using credentials from environment variables.
+    """
+    if integration_config is None:
+        pytest.skip("Integration credentials not available")
+
+    config = integration_config["mockexchange"]
+    return ExchangeFactory.create_paper_gateway(**config)
+
+
+@pytest.fixture
+def integration_prod_gateway(integration_config):
+    """Create a production mode gateway with real exchange credentials.
+
+    This fixture creates a gateway connected to a real exchange (in sandbox mode)
+    using credentials from environment variables.
+    """
+    if integration_config is None or "exchange" not in integration_config:
+        pytest.skip("Production mode credentials not available")
+
+    config = integration_config["exchange"]
+    return ExchangeFactory.create_prod_gateway(**config)
+
+
+@pytest.fixture
+def test_symbol():
+    """Get a test symbol that should work with both paper and prod modes."""
+    return "BTC/USDT"
+
+
+@pytest.fixture
+def test_amount():
+    """Get a small test amount for order testing."""
+    return 0.001
