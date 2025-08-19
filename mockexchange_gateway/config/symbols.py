@@ -42,8 +42,10 @@ class SymbolMapper:
         """Load symbol mappings from file or use defaults."""
         if mapping_file and Path(mapping_file).exists():
             with open(mapping_file, "r") as f:
-                return json.load(f)
-
+                raw = json.load(f)
+                if not isinstance(raw, dict):
+                    raise ValueError("Symbol mapping file must contain a JSON object of mappings")
+                return {str(k).upper(): str(v).upper() for k, v in raw.items()}
         # Default mappings (MockExchange format -> CCXT format)
         return {
             # Add any specific mappings here if needed
