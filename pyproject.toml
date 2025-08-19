@@ -11,13 +11,16 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Office/Business :: Financial :: Investment",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.9"
 requests = "^2.32.0"
 ccxt = "^4.0.0"
 typing-extensions = "^4.0.0"
@@ -34,10 +37,10 @@ bandit = "^1.7.0"
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py39"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.9"
 warn_return_any = false
 warn_unused_configs = true
 disallow_untyped_defs = false

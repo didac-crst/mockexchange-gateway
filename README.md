@@ -2,7 +2,7 @@
 
 **CCXT-compatible gateway for seamless switching between MockExchange and real exchanges**
 
-[![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-23%2F23%20unit%20tests-green.svg)](https://github.com/didac-crst/mockexchange-gateway)
 [![Status](https://img.shields.io/badge/status-production%20ready-success.svg)](https://github.com/didac-crst/mockexchange-gateway)
