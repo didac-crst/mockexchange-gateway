@@ -219,16 +219,16 @@ prod_gateway = create_prod_gateway(
 For more advanced use cases:
 
 ```python
-from mockexchange_gateway import MockXFactory
+from mockexchange_gateway import ExchangeFactory
 
 # Create paper mode gateway
-paper_gateway = MockXFactory.create_paper_gateway(
+paper_gateway = ExchangeFactory.create_paper_gateway(
     base_url="http://localhost:8000",
     api_key="dev-key"
 )
 
 # Create production mode gateway
-prod_gateway = MockXFactory.create_prod_gateway(
+prod_gateway = ExchangeFactory.create_prod_gateway(
     exchange_id="coinbase",  # or 'binance', 'kraken', etc.
     api_key="your-exchange-key",
     secret="your-exchange-secret"

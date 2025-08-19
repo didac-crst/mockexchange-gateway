@@ -4,7 +4,7 @@ Simple import test to verify the MockX Gateway is working correctly.
 This example doesn't require MockExchange to be running.
 """
 
-from mockexchange_gateway import MockXFactory, NotSupported, create_paper_gateway
+from mockexchange_gateway import ExchangeFactory, NotSupported
 
 
 def test_imports():
@@ -14,12 +14,14 @@ def test_imports():
     # Test gateway creation (without making network calls)
     try:
         # Test with explicit configuration (library best practice)
-        gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="test-key")
+        gateway = ExchangeFactory.create_paper_gateway(
+            base_url="http://localhost:8000", api_key="test-key"
+        )
         print(f"✅ Paper gateway created: {gateway}")
         print(f"✅ Gateway capabilities: {len(gateway.has)} features")
 
         # Test factory class method
-        gateway2 = MockXFactory.create_paper_gateway(
+        gateway2 = ExchangeFactory.create_paper_gateway(
             base_url="http://localhost:8000", api_key="test-key-2"
         )
         print(f"✅ Factory method works: {gateway2}")

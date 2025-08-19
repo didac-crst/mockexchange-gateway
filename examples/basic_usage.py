@@ -6,7 +6,7 @@ This example shows how to create gateways with explicit configuration,
 which is the recommended approach for libraries.
 """
 
-from mockexchange_gateway import MockXFactory, create_paper_gateway
+from mockexchange_gateway import ExchangeFactory
 
 
 def paper_mode_example():
@@ -14,7 +14,9 @@ def paper_mode_example():
     print("=== Paper Mode Example ===")
 
     # Create paper mode gateway with explicit configuration
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     print("Gateway mode: Paper")
     print(f"Gateway capabilities: {len(gateway.has)} features")
@@ -40,7 +42,7 @@ def production_mode_example():
 
     # This would create a production gateway (commented out as it requires real API keys)
     """
-    gateway = create_prod_gateway(
+    gateway = ExchangeFactory.create_prod_gateway(
         exchange_id="binance",  # or 'coinbase', 'kraken', etc.
         api_key="your-exchange-api-key",
         secret="your-exchange-secret",
@@ -58,16 +60,16 @@ def factory_class_example():
     print("\n=== Factory Class Example ===")
 
     # Using factory class directly
-    gateway = MockXFactory.create_paper_gateway(
+    gateway = ExchangeFactory.create_paper_gateway(
         base_url="http://localhost:8000", api_key="factory-test-key"
     )
 
     print(f"Factory-created gateway: {gateway}")
-    print("Same API as convenience functions")
+    print("Clean, professional API")
 
     # Example of production gateway creation (commented out)
     """
-    prod_gateway = MockXFactory.create_prod_gateway(
+    prod_gateway = ExchangeFactory.create_prod_gateway(
         exchange_id="coinbase",  # or 'binance', 'kraken', etc.
         api_key="your-exchange-key",
         secret="your-exchange-secret"

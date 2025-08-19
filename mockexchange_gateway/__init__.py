@@ -22,17 +22,15 @@ from .core.errors import (
     RequestTimeout,
 )
 from .core.facade import MockXGateway
-from .runtime.factory import MockXFactory, create_paper_gateway, create_prod_gateway
+from .runtime.factory import ExchangeFactory
 
 __version__ = "0.2.0"
 
 __all__ = [
     # Main gateway class
     "MockXGateway",
-    # Factory functions
-    "create_paper_gateway",
-    "create_prod_gateway",
-    "MockXFactory",
+    # Factory class
+    "ExchangeFactory",
     # Error classes
     "MockXError",
     "ExchangeError",
