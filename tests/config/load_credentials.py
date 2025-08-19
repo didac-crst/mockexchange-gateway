@@ -16,7 +16,7 @@ Usage:
 import os
 import sys
 from pathlib import Path
-
+import argparse
 # Add the tests/config directory to the path
 config_dir = Path(__file__).parent
 sys.path.insert(0, str(config_dir))
