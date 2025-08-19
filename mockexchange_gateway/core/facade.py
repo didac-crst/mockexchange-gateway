@@ -144,8 +144,9 @@ class MockXGateway:
 
     def fetch_balance_list(self) -> Dict[str, Any]:
         """Fetch list of assets with balances."""
+        if self._mode != "paper":
+            raise NotSupported("fetch_balance_list is only available in paper mode (MockExchange).")
         return self._adapter.fetch_balance_list()
-
     # MockExchange-specific methods (not part of CCXT standard)
     def deposit(
         self, asset: str, amount: float, params: Optional[Dict[str, Any]] = None
