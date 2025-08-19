@@ -237,27 +237,30 @@ prod_gateway = MockXFactory.create_prod_gateway(
 
 ## ⚙️ Configuration
 
-### Environment Variables
+### Constructor-Based Configuration
 
-Copy `env.example` to `.env` and customize:
+The gateway uses explicit constructor-based configuration for better library design:
 
-```bash
-# Mode configuration
-MOCKX_MODE=paper                    # paper | prod
-MOCKX_EXCHANGE_ID=binance          # Only for prod mode
-
+```python
 # Paper mode (MockExchange)
-MOCKX_BASE_URL=http://localhost:8000
-MOCKX_API_KEY=dev-key
-MOCKX_TIMEOUT=10.0
+gateway = create_paper_gateway(
+    base_url="http://localhost:8000",
+    api_key="dev-key",
+    timeout=10.0
+)
 
-# Production mode (Real exchanges)
-BINANCE_API_KEY=your_api_key       # {EXCHANGE_ID}_API_KEY
-BINANCE_API_SECRET=your_secret     # {EXCHANGE_ID}_API_SECRET
-MOCKX_SANDBOX=false                # true for testnet
+# Production mode (Real Exchange)
+gateway = create_prod_gateway(
+    exchange_id="binance",  # or 'coinbase', 'kraken', etc.
+    api_key="your-api-key",
+    secret="your-secret-key",
+    sandbox=True  # Use testnet for safety
+)
 ```
 
 ### Environment-Based Switching
+
+For applications that need to switch modes based on environment:
 
 ```python
 import os
@@ -350,25 +353,38 @@ specific_tickers = gateway.fetch_tickers(['BTC/USDT', 'ETH/USDT'])  # Returns sp
 
 #### **📋 Order Status Mapping**
 
-**MockExchange Order Statuses:**
-- `"new"` - Order placed, not yet filled
-- `"partially_filled"` - Order partially executed
-- `"filled"` - Order completely executed
-- `"canceled"` - Order canceled
-- `"expired"` - Order expired
-- `"rejected"` - Order rejected
-- `"partially_canceled"` - Order partially canceled
-- `"partially_rejected"` - Order partially rejected
-- `"partially_expired"` - Order partially expired
+**MockExchange Order Statuses → CCXT Standard Statuses:**
+- `"new"` → `"open"` - Order placed, not yet filled
+- `"partially_filled"` → `"partially_filled"` - Order partially executed  
+- `"filled"` → `"closed"` - Order completely executed
+- `"canceled"` → `"canceled"` - Order canceled
+- `"expired"` → `"expired"` - Order expired
+- `"rejected"` → `"rejected"` - Order rejected
+- `"partially_canceled"` → `"canceled"` - Order partially canceled
+- `"partially_rejected"` → `"rejected"` - Order partially rejected
+- `"partially_expired"` → `"expired"` - Order partially expired
 
-**Gateway Mapping:**
+**Gateway Behavior:**
 ```python
 # fetch_open_orders() filters for "new" and "partially_filled" statuses
-open_orders = gateway.fetch_open_orders()  # Only returns truly open orders
+open_orders = gateway.fetch_open_orders()  # Returns orders with status "open" or "partially_filled"
 
-# fetch_orders() returns all orders with all statuses
-all_orders = gateway.fetch_orders()  # Returns orders in any status
+# fetch_orders() returns all orders with CCXT-standard statuses
+all_orders = gateway.fetch_orders()  # Returns orders with mapped CCXT statuses
+
+# Order status is always CCXT-compatible regardless of backend
+for order in all_orders:
+    print(f"Order {order['id']}: {order['status']}")  # Always CCXT standard status
 ```
+
+**CCXT Standard Order Statuses:**
+- `"open"` - Order is active and waiting to be filled
+- `"closed"` - Order is completely filled
+- `"canceled"` - Order was canceled
+- `"pending"` - Order is pending activation
+- `"rejected"` - Order was rejected
+- `"expired"` - Order expired
+- `"partially_filled"` - Order is partially filled
 
 #### **💰 Balance Operations**
 

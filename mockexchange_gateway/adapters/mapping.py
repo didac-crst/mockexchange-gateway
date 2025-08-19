@@ -82,14 +82,43 @@ class DataMapper:
 
     @staticmethod
     def mockexchange_order_to_ccxt(order_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Convert MockExchange order to CCXT format."""
+        """Convert MockExchange order to CCXT format.
+
+        Maps MockExchange order statuses to CCXT standard statuses:
+        - MockExchange 'new' -> CCXT 'open'
+        - MockExchange 'partially_filled' -> CCXT 'partially_filled'
+        - MockExchange 'filled' -> CCXT 'closed'
+        - MockExchange 'canceled' -> CCXT 'canceled'
+        - MockExchange 'rejected' -> CCXT 'rejected'
+        - MockExchange 'expired' -> CCXT 'expired'
+        """
+        # Map MockExchange statuses to CCXT standard statuses
+        status_mapping = {
+            "new": "open",
+            "partially_filled": "partially_filled",
+            "filled": "closed",
+            "canceled": "canceled",
+            "rejected": "rejected",
+            "expired": "expired",
+            "partially_canceled": "canceled",
+            "partially_rejected": "rejected",
+            "partially_expired": "expired",
+        }
+
+        mockexchange_status = order_data.get("status")
+        ccxt_status = (
+            status_mapping.get(str(mockexchange_status), str(mockexchange_status))
+            if mockexchange_status
+            else "unknown"
+        )
+
         return {
             "id": order_data.get("id"),
             "clientOrderId": None,
             "datetime": DataMapper._timestamp_to_datetime(order_data.get("created_at")),
             "timestamp": order_data.get("created_at"),
             "lastTradeTimestamp": order_data.get("updated_at"),
-            "status": order_data.get("status"),
+            "status": ccxt_status,  # Use mapped CCXT status
             "symbol": order_data.get("symbol"),
             "type": order_data.get("type"),
             "timeInForce": None,
