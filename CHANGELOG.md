@@ -109,15 +109,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Type checking** - Fixed MyPy configuration for CCXT compatibility
 - **Security issues** - Resolved Bandit warnings with specific exception handling
 - **Order status mapping** - Corrected MockExchange order status filtering
-- **API redundancy** - Removed duplicate convenience functions in favor of single ExchangeFactory
+- **API redundancy** - Removed duplicate convenience functions discovered during development
 - **Naming clarity** - Renamed MockXFactory to ExchangeFactory for better professional appearance
 - **Documentation consistency** - Updated all examples to use new ExchangeFactory API
 - **Makefile syntax** - Fixed missing @ prefixes in echo statements
 - **Mermaid diagram readability** - Improved colors and contrast for better visibility
 - **API compatibility** - Ensured full CCXT method signature compliance
-- **Interface consistency** - Fixed ProdAdapter.fetch_balance() method signature to match PaperAdapter
-- **Integration test failures** - Fixed method signature mismatches between adapters
-- **Outdated API references** - Updated all documentation to use ExchangeFactory consistently
+- **Adapter interface consistency** - Ensured ProdAdapter and PaperAdapter have matching method signatures
+- **Integration test failures** - Fixed method signature mismatches discovered during development
+- **Documentation consistency** - Updated all documentation to use ExchangeFactory consistently
 - **GitHub templates** - Fixed outdated API references in issue templates
 - **Examples documentation** - Fixed outdated API references in examples README
 
