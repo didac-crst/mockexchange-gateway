@@ -6,7 +6,7 @@ This example demonstrates how to check what features are available
 before using them, enabling graceful degradation and better error handling.
 """
 
-from mockexchange_gateway import create_paper_gateway
+from mockexchange_gateway import ExchangeFactory
 
 
 def demonstrate_capability_checking():
@@ -14,7 +14,9 @@ def demonstrate_capability_checking():
     print("=== Capability Checking Example ===")
 
     # Create gateways for both modes
-    paper_gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    paper_gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     print("📊 Paper Mode Capabilities:")
     check_capabilities(paper_gateway, "Paper")
@@ -93,7 +95,9 @@ def demonstrate_safe_feature_usage():
     """Demonstrate safe usage patterns based on capabilities."""
     print("\n=== Safe Feature Usage Example ===")
 
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     # Example 1: Safe market data fetching
     print("\n1. Safe Market Data Fetching:")
@@ -158,7 +162,9 @@ def demonstrate_feature_detection():
     """Demonstrate advanced feature detection patterns."""
     print("\n=== Advanced Feature Detection ===")
 
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     # Example: Detect what type of trading is supported
     print("\nTrading Feature Detection:")
@@ -208,7 +214,9 @@ def demonstrate_conditional_workflows():
     """Demonstrate conditional workflows based on capabilities."""
     print("\n=== Conditional Workflows ===")
 
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     # Example: Adaptive trading strategy based on available features
     print("\nAdaptive Trading Strategy:")

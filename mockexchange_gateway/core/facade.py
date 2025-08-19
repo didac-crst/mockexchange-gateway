@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from ..adapters.paper import PaperAdapter
 from ..core.capabilities import get_has_dict, require_support
+from ..core.errors import NotSupported
 
 
 class MockXGateway:
@@ -147,17 +148,22 @@ class MockXGateway:
         if self._mode != "paper":
             raise NotSupported("fetch_balance_list is only available in paper mode (MockExchange).")
         return self._adapter.fetch_balance_list()
+
     # MockExchange-specific methods (not part of CCXT standard)
     def deposit(
         self, asset: str, amount: float, params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Deposit asset to account (MockExchange-specific)."""
+        if self._mode != "paper":
+            raise NotSupported("deposit is only available in paper mode (MockExchange).")
         return self._adapter.deposit(asset, amount, params)
 
     def withdraw(
         self, asset: str, amount: float, params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Withdraw asset from account (MockExchange-specific)."""
+        if self._mode != "paper":
+            raise NotSupported("withdraw is only available in paper mode (MockExchange).")
         return self._adapter.withdraw(asset, amount, params)
 
     def can_execute_order(
@@ -170,6 +176,8 @@ class MockXGateway:
         params: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Check if an order can be executed (MockExchange-specific)."""
+        if self._mode != "paper":
+            raise NotSupported("can_execute_order is only available in paper mode (MockExchange).")
         return self._adapter.can_execute_order(symbol, type, side, amount, price, params)
 
     def fetch_positions(self, symbols: Optional[List[str]] = None) -> List[Dict[str, Any]]:

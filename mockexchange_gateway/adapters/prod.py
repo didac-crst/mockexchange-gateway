@@ -6,6 +6,7 @@ This adapter provides a thin pass-through to CCXT exchange instances,
 ensuring consistent interface with the paper adapter.
 """
 
+import logging
 from typing import Any, Dict, List, Optional
 
 import ccxt
@@ -51,13 +52,21 @@ class ProdAdapter:
             exchange_class = getattr(ccxt, self.exchange_id)
             self._exchange = exchange_class(self.config)
 
-            # Load markets if not in sandbox mode
-            if not self.config.get("sandbox", False) and self._exchange is not None:
+            # Enable sandbox mode if requested (before loading markets)
+            if self.config.get("sandbox", False) and self._exchange is not None:
+                try:
+                    self._exchange.setSandboxMode(True)
+                except AttributeError:
+                    # Some exchanges or older ccxt versions may not support sandbox mode
+                    pass
+
+            # Load markets (both live and sandbox)
+            if self._exchange is not None:
                 try:
                     self._exchange.load_markets()
                 except Exception as e:
                     # Log warning but don't fail - markets can be loaded later
-                    print(f"Warning: Could not load markets for {self.exchange_id}: {e}")
+                    logging.warning("Could not load markets for %s: %s", self.exchange_id, e)
 
         except AttributeError:
             raise ExchangeError(f"Exchange '{self.exchange_id}' not found in CCXT")

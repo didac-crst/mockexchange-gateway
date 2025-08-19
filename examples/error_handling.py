@@ -11,11 +11,11 @@ from mockexchange_gateway import (
     AuthenticationError,
     BadSymbol,
     ExchangeError,
+    ExchangeFactory,
     InsufficientFunds,
     NetworkError,
     NotSupported,
     OrderNotFound,
-    create_paper_gateway,
 )
 
 
@@ -24,7 +24,9 @@ def demonstrate_error_handling():
     print("=== Error Handling Example ===")
 
     # Create gateway
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     # 1. Check capabilities before using features
     print("\n1. Capability Checking:")
@@ -44,16 +46,14 @@ def demonstrate_error_handling():
 
     # 2. Handle NotSupported errors gracefully
     print("\n2. NotSupported Error Handling:")
-    unsupported_features = [
-        ("fetchOHLCV", "BTC/USDT", "1h"),
-        ("fetchOrderBook", "BTC/USDT"),
-        ("fetchTrades", "BTC/USDT"),
+    unsupported_calls = [
+        ("fetch_ohlcv", ("BTC/USDT", "1h")),
+        ("fetch_order_book", ("BTC/USDT",)),
     ]
 
-    for method_name, *args in unsupported_features:
+    for method_name, args in unsupported_calls:
         try:
-            method = getattr(gateway, method_name)
-            result = method(*args)
+            result = getattr(gateway, method_name)(*args)
             print(f"✅ {method_name}: {result}")
         except NotSupported as e:
             print(f"❌ {method_name}: {e}")
@@ -96,7 +96,9 @@ def demonstrate_error_handling():
     print("\n5. Authentication Error Handling:")
     try:
         # Try with invalid API key
-        bad_gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="invalid-key")
+        bad_gateway = ExchangeFactory.create_paper_gateway(
+            base_url="http://localhost:8000", api_key="invalid-key"
+        )
         balance = bad_gateway.fetch_balance()
         print(f"✅ Balance fetched: {balance}")
     except AuthenticationError as e:
@@ -110,7 +112,9 @@ def demonstrate_graceful_degradation():
     """Demonstrate graceful degradation when features aren't available."""
     print("\n=== Graceful Degradation Example ===")
 
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     # Example: Try to get market data, fallback to basic info if advanced features unavailable
     symbol = "BTC/USDT"
@@ -160,7 +164,9 @@ def demonstrate_error_recovery():
     """Demonstrate error recovery patterns."""
     print("\n=== Error Recovery Example ===")
 
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="dev-key"
+    )
 
     # Example: Retry pattern for network operations
     def retry_operation(operation, max_retries=3, delay=1):
