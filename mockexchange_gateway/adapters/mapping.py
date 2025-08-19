@@ -193,14 +193,18 @@ class DataMapper:
     @staticmethod
     def ccxt_order_to_mockexchange(order_data: Dict[str, Any]) -> Dict[str, Any]:
         """Convert CCXT order format to MockExchange format."""
-        return {
+        order_type = order_data.get("type")
+        payload = {
             "symbol": order_data.get("symbol"),
-            "type": order_data.get("type"),
+            "type": order_type,
             "side": order_data.get("side"),
             "amount": order_data.get("amount"),
-            "price": order_data.get("price"),
             "params": order_data.get("params", {}),
         }
+        # MockExchange expects limit_price for limit orders
+        if order_type == "limit":
+            payload["limit_price"] = order_data.get("price")
+        return payload
 
     @staticmethod
     def _timestamp_to_datetime(timestamp: Optional[int]) -> Optional[str]:
