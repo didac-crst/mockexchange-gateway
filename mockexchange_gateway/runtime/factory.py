@@ -57,7 +57,7 @@ class ExchangeFactory:
             MockXGateway: Paper mode gateway instance
 
         Example:
-            >>> gateway = MockXFactory.create_paper_gateway(
+            >>> gateway = ExchangeFactory.create_paper_gateway(
             ...     base_url="http://localhost:8000",
             ...     api_key="your-api-key"
             ... )
