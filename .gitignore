@@ -14,6 +14,7 @@ pip-wheel-metadata/
 .pytest_cache/
 .coverage
 htmlcov/
+# Note: poetry.lock is intentionally NOT ignored - it should be committed for reproducible builds
 
 # Local virtual-envs (venv, pipenv, conda envs created inside project)
 venv/
@@ -35,6 +36,12 @@ Thumbs.db
 # Environment variables & user-specific settings
 *.env
 .env.*
+
+# Integration test credentials
+tests/config/local_credentials.py
+integration_config.json
+*.key
+*.secret
 # (keep .env.sample checked-in instead)
 
 # ────────────────────────── Docker build cache ────────────────────────
@@ -56,3 +63,21 @@ junit-*.xml
 .pyre/
 # Mac resource forks
 ._*
+
+# ────────────────────────── MockX Gateway specific ─────────────────────
+# Symbol mapping files
+symbol_mappings.json
+symbol_mappings_*.json
+
+# Test coverage reports
+.coverage
+htmlcov/
+.coverage.*
+
+# Ruff cache
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

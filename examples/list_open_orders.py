@@ -1,28 +1,43 @@
 """examples/list_open_orders.py
 
-Example: retrieving open orders.
+Example: listing open orders from MockExchange.
 
-Rationale
----------
-Separated from `basic_usage.py` to keep each example *single-purpose*:
-    * Easier for new users to locate a relevant snippet.
-    * Reduces cognitive load (no unrelated balance / ticker noise).
-
-Assumptions
------------
-* The `mockexchange_api` server is running and accessible at the default
-  base URL (`http://localhost:8000`).
-* Markets have been loaded previously or the server endpoints function
-  without requiring an explicit preload (the gateway will call the
-  orders endpoint directly).
+This example demonstrates how to:
+1. Create a gateway instance
+2. Load markets
+3. Fetch open orders
+4. Display order information
 """
 
-from mockexchange_gateway import MockExchangeGateway
+from mockexchange_gateway import create_paper_gateway
 
-# Using defaults: base_url and api_key resolved via environment or hardcoded defaults.
-gx = MockExchangeGateway()
 
-# Retrieve currently open orders. If none exist, expect an empty list.
-# This mirrors CCXT's 'fetch_open_orders' semantics.
-orders = gx.fetch_open_orders()
-print("Open orders:", orders)
+def main():
+    """Main function demonstrating open orders listing."""
+    print("=== Listing Open Orders Example ===")
+
+    # Create gateway
+    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+
+    try:
+        # Load markets first
+        markets = gateway.load_markets()
+        print(f"Loaded {len(markets)} markets")
+
+        # Fetch open orders
+        open_orders = gateway.fetch_open_orders()
+        print(f"Found {len(open_orders)} open orders")
+
+        # Display order details
+        for order in open_orders:
+            print(
+                f"Order {order['id']}: {order['symbol']} {order['side']} {order['amount']} @ {order.get('price', 'market')}"
+            )
+
+    except Exception as e:
+        print(f"Error: {e}")
+        print("Make sure MockExchange is running at http://localhost:8000")
+
+
+if __name__ == "__main__":
+    main()

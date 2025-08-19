@@ -1,38 +1,43 @@
 """examples/place_market_order.py
 
-Example: placing a simple market buy order.
+Example: placing a market order.
 
-Purpose
--------
-Show the minimal sequence to:
-    1. Initialize the gateway client
-    2. Load available markets
-    3. Submit a market order
-    4. Inspect the normalized order response
-
-Why a dedicated file?
----------------------
-Keeping *one behavior per example* makes it easier for users to grep
-or skim the `examples/` directory and quickly find the scenario they need.
+This example demonstrates how to:
+1. Create a gateway instance
+2. Load markets
+3. Place a market order
+4. Display order information
 """
 
-from mockexchange_gateway import MockExchangeGateway
+from mockexchange_gateway import create_paper_gateway
 
-# Instantiate with default configuration (base_url can be overridden via env
-# or by passing it explicitly). For concise examples we omit the api_key;
-# in authenticated setups you would pass api_key="...".
-gx = MockExchangeGateway()
 
-# Ensure symbol cache is populated. While some methods don't strictly need
-# this (server endpoints can still function), mirroring the CCXT usage
-# pattern reinforces consistency and catches symbol availability issues early.
-gx.load_markets()
+def main():
+    """Main function demonstrating market order placement."""
+    print("=== Placing Market Order Example ===")
 
-# Create a market BUY order for 0.001 BTC against USDT.
-# Price is determined server-side (latest ticker). We intentionally avoid
-# extra params here to keep the example focused and readable.
-order = gx.create_order("BTC/USDT", type="market", side="buy", amount=0.001)
+    # Create gateway
+    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
 
-# Print the normalized order dict. In real code you'd persist, log, or
-# feed this into strategy state machines.
-print(order)
+    try:
+        # Load markets first
+        markets = gateway.load_markets()
+        print(f"Loaded {len(markets)} markets")
+
+        # Place a market buy order for 0.001 BTC
+        order = gateway.create_order("BTC/USDT", "market", "buy", 0.001)
+        print("Order placed successfully!")
+        print(f"Order ID: {order['id']}")
+        print(f"Symbol: {order['symbol']}")
+        print(f"Type: {order['type']}")
+        print(f"Side: {order['side']}")
+        print(f"Amount: {order['amount']}")
+        print(f"Status: {order['status']}")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        print("Make sure MockExchange is running at http://localhost:8000")
+
+
+if __name__ == "__main__":
+    main()

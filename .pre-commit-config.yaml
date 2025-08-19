@@ -1,0 +1,57 @@
+repos:
+  # Code formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+        args: [--ignore-missing-imports]
+
+  # Security checks
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [-r, mockexchange_gateway/]
+        exclude: ^(tests|examples)/
+
+  # Import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile, black]
+
+  # Commit message formatting
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # File size checks (disabled for now)
+  # - repo: local
+  #   hooks:
+  #     - id: check-large-files
+  #       name: Check for large files
+  #       entry: bash -c 'if git diff --cached --name-only | xargs ls -l 2>/dev/null | awk "{if (\$5 > 500000) print \$9, \$5}"; then echo "Large files detected (>500KB)"; exit 1; fi'
+  #       language: system
+  #       stages: [pre-commit]
+
+  # Python syntax check
+  - repo: local
+    hooks:
+      - id: python-syntax-check
+        name: Python syntax check
+        entry: python -m py_compile
+        language: system
+        types: [python]
+        exclude: ^tests/
