@@ -19,158 +19,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2025-08-19
 
 ### Added
-- **Complete Architecture Overhaul**: New clean, modular design
-- **CCXT-Compatible Facade**: Drop-in replacement for CCXT
-- **Dual Mode Support**: Paper (MockExchange) and Production (CCXT) modes
-- **Environment-Based Configuration**: Automatic mode switching via environment variables
-- **Capability System**: Explicit feature detection via `exchange.has` dict
-- **Fail-Fast Error Handling**: Clear `NotSupported` errors for unsupported features
-- **Type Safety**: Full type hints and validation throughout
-- **Poetry support** - Added Poetry as the recommended package manager with full pip compatibility
-- **Lock file** - `poetry.lock` for reproducible builds and dependency resolution
-- **Enhanced Makefile** - Added Poetry commands alongside pip commands (`build-poetry`, `publish-poetry`, etc.)
-- **Table of Contents** - Added comprehensive TOC to README for better navigation
-- **MockExchange API documentation** - Detailed explanation of API behavior differences and compatibility
-- **GitHub installation instructions** - Clear instructions for installing from GitHub repository
-- **MockExchange-specific features** - `fetch_balance(asset)`, `fetch_balance_list()`, `deposit()`, `withdraw()`, `can_execute_order()`
-- **Enhanced examples** - New examples for error handling, capability checking, ticker analysis, and balance operations
-- **Examples README** - Comprehensive guide to all example files and their usage
-- **Pre-commit hooks** - Automated code quality checks with ruff, mypy, bandit, isort, and commitizen
-- **GitHub Actions CI/CD** - Automated testing, linting, and release workflows
-- **Integration test framework** - Pytest markers and credential management for integration testing
-- **Comprehensive documentation** - Enhanced README with detailed API compatibility explanations
-- **Security scanning** - Bandit security analysis integrated into pre-commit hooks
-- **GitHub templates** - Comprehensive templates for pull requests, bug reports, and feature requests
-- **Release template** - Professional release template with comprehensive sections
-- **Automated release workflow** - Tag-based releases with quality checks and asset uploads
-- **Best practices documentation** - 6 comprehensive sections for seamless mode switching
-- **Environment-based configuration** - Examples and patterns for automatic mode switching
-- **Testing strategy examples** - Paper mode and production mode testing patterns
-- **Deployment workflow** - Development → staging → production progression
-- **Error handling best practices** - Capability checking and graceful degradation
-- **Adaptive trading strategies** - Dynamic feature detection and fallback mechanisms
-
-#### Core Components
-- **Configuration Management** (`config/`)
-  - Environment variable handling (`env.py`)
-  - Symbol mapping and normalization (`symbols.py`)
-- **Core Functionality** (`core/`)
-  - CCXT-compatible facade (`facade.py`)
-  - Error classes matching CCXT (`errors.py`)
-  - Capability detection (`capabilities.py`)
-- **Backend Adapters** (`adapters/`)
-  - Paper adapter for MockExchange (`paper.py`)
-  - Production adapter for CCXT (`prod.py`)
-  - Data format conversion (`mapping.py`)
-- **Runtime Components** (`runtime/`)
-  - Gateway factory (`factory.py`)
-
-#### Factory Functions
-- `ExchangeFactory.create_paper_gateway()` and `ExchangeFactory.create_prod_gateway()` - Constructor-based gateway creation
-- `ExchangeFactory.create_paper_gateway()` - Direct MockExchange gateway
-- `ExchangeFactory.create_prod_gateway()` - Direct CCXT gateway
-
-#### Error Classes
-- `MockXError` - Base exception class
-- `ExchangeError` - Exchange-related errors
-- `AuthenticationError` - Authentication failures
-- `BadRequest` - Invalid requests
-- `InsufficientFunds` - Insufficient balance
-- `InvalidOrder` - Order-related errors
-- `NotSupported` - Unsupported features
-- `NetworkError` - Network-related errors
-
-#### Capabilities
-- **Paper Mode**: Core trading features (orders, balance, tickers)
-- **Production Mode**: Full CCXT feature set
-- **Capability Detection**: `gateway.has` dict for feature checking
+- **CCXT-compatible facade** as the public API (method names & return shapes aligned with CCXT)
+- **Dual backend support**:
+  - Paper mode: routes to MockExchange for simulated execution
+  - Production mode: routes to real exchanges via CCXT
+- **ExchangeFactory** to construct the correct gateway for paper or production with a single switch
+- **Capability map** (`exchange.has`) to explicitly advertise supported features per mode
+- **CCXT-style error mapping** (e.g., NotSupported, InvalidOrder, InsufficientFunds, ExchangeError)
+- **Adapters layer**:
+  - Paper adapter (MockExchange)
+  - Prod adapter (CCXT)
+- **Documentation & examples**:
+  - Architecture overview and capability matrix
+  - Paper vs. production usage examples
+  - Best-practices guidance for using MockX Gateway at the execution boundary and CCXT for data-heavy reads
+- **Tooling & packaging**:
+  - Poetry project configuration (with lockfile)
+  - Pre-commit hooks (ruff, mypy, isort, bandit)
+  - Basic CI workflow for lint/type/unit tests
 
 ### Changed
-- **Package Structure**: Complete reorganization for better modularity
-- **API Design**: CCXT-compatible interface throughout
-- **Configuration**: Environment-based instead of hardcoded values
-- **Error Handling**: CCXT-style error hierarchy
-- **Type Safety**: Comprehensive type hints and validation
-- **Package management** - Migrated from setuptools to Poetry while maintaining pip compatibility
-- **Build system** - Updated to use `poetry-core` as build backend
-- **fetchTickers implementation** - Refactored to handle MockExchange's unique API behavior (list vs. ticker data)
-- **fetchTickers behavior** - Removed arbitrary 50-ticker limit to match CCXT behavior exactly
-- **fetch_open_orders implementation** - Fixed to properly filter MockExchange order statuses (`new`, `partially_filled`)
-- **MyPy configuration** - Optimized for external API integration with proper ignore settings
-- **Constructor-based configuration** - Refactored from environment variables to explicit parameters
-- **Code formatting** - Applied Ruff formatting across entire codebase
-- **Error handling** - Improved exception specificity in paper adapter
-- **Documentation structure** - Enhanced with proper sections, examples, and navigation
-- **README best practices** - Added comprehensive section for seamless mode switching
-- **Release automation** - Simplified to GitHub-based workflow with templates
-
-### Fixed
-- **Linting issues** - Resolved unused imports and f-string formatting issues
-- **Type checking** - Fixed MyPy configuration for CCXT compatibility
-- **Security issues** - Resolved Bandit warnings with specific exception handling
-- **Order status mapping** - Corrected MockExchange order status filtering
-- **API redundancy** - Removed duplicate convenience functions discovered during development
-- **Naming clarity** - Renamed MockXFactory to ExchangeFactory for better professional appearance
-- **Documentation consistency** - Updated all examples to use new ExchangeFactory API
-- **Makefile syntax** - Fixed missing @ prefixes in echo statements
-- **Mermaid diagram readability** - Improved colors and contrast for better visibility
-- **API compatibility** - Ensured full CCXT method signature compliance
-- **Adapter interface consistency** - Ensured ProdAdapter and PaperAdapter have matching method signatures
-- **Integration test failures** - Fixed method signature mismatches discovered during development
-- **Documentation consistency** - Updated all documentation to use ExchangeFactory consistently
-- **GitHub templates** - Fixed outdated API references in issue templates
-- **Examples documentation** - Fixed outdated API references in examples README
+- **Repository structure** reorganized into `core/` (facade, capabilities, errors), `adapters/` (paper/prod), and `runtime/` (factory) for clearer separation of concerns
+- **API surface** standardized to a stricter CCXT dialect (consistent keys/types across backends)
 
 ### Removed
-- Old monolithic client structure
-- Hardcoded configuration values
-- Pydantic dependency (simplified data handling)
-- **Environment variable dependencies** - Removed from library instantiation (still used for integration tests)
-- **Artificial limits** - Removed 50-ticker limit from fetchTickers
-- **Hardcoded URLs** - Replaced personal MockExchange URL with localhost default
+- **Monolithic client layout** from 0.1.0 in favor of facade + adapters architecture
+- **Pydantic dependency**, replaced by lighter validation to keep the gateway lean
 
 ## [0.1.0] - 2025-07-18
 
 ### Added
-- Initial implementation of MockExchange client
-- Basic CCXT-like interface
-- HTTP client for MockExchange API
-- Support for basic operations:
-  - Market data (tickers)
-  - Balance snapshots
-  - Order lifecycle (create, list, cancel)
-  - Dry-run order execution
-- Pydantic models for data validation
-- Basic error handling
-- In-memory backend for testing
-- Protocol definitions for CCXT compatibility
-
-### Features
-- `load_markets()` - Populate symbol cache
-- `fetch_ticker()` - Get single ticker
-- `fetch_tickers()` - Get all tickers
-- `fetch_balance()` - Get account balance
-- `create_order()` - Create market/limit orders
-- `fetch_order()` - Get specific order
-- `fetch_orders()` - List orders with filtering
-- `fetch_open_orders()` - Get open orders
-- `cancel_order()` - Cancel orders
-- `can_execute_order()` - Dry-run order validation
-
-### Technical Details
-- Python 3.11+ support
+- Initial MockExchange client with a basic CCXT-like interface (tickers, balances, orders, dry-run)
 - Requests-based HTTP client
-- Pydantic for data validation
-- Type hints throughout
-- Basic test suite
-- Development dependencies setup
+- Simple error handling
+- In-memory backend for tests
 
 ---
 
 ## Version History Summary
 
-- **0.1.0**: Initial implementation with basic MockExchange client
-- **0.2.0**: Complete architecture overhaul with CCXT compatibility, dual-mode support, Poetry migration, comprehensive documentation, enhanced tooling, and production-ready polish
+- **0.1.0**: First working MockExchange client with CCXT-like basics
+- **0.2.0**: Major architectural upgrade: CCXT-compatible facade, dual backends (paper/prod), capability map, error mapping, adapters, docs, and modern tooling
 
 ---
 
