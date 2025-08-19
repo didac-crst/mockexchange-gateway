@@ -687,10 +687,6 @@ result = my_trading_strategy(prod_gateway)
 
 ## 🛠️ Development
 
-**Goal**: Provide everything needed to set up and contribute to the MockX Gateway project.
-
-**Why this matters**: Whether you're using the library or contributing to it, you need clear setup instructions and development tools.
-
 ### Setup
 
 **Goal**: Get the development environment ready with all necessary tools and dependencies.
