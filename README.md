@@ -177,10 +177,10 @@ make examples
 > **⚠️ Note**: The following example assumes you have a MockExchange Engine running at `http://localhost:8000`. See the [MockExchange Suite](https://github.com/didac-crst/mockexchange) for setup instructions.
 
 ```python
-from mockexchange_gateway import create_paper_gateway
+from mockexchange_gateway import ExchangeFactory
 
-# Create paper mode gateway with explicit configuration
-gateway = create_paper_gateway(
+# Create paper mode gateway (MockExchange)
+gateway = ExchangeFactory.create_paper_gateway(
     base_url="http://localhost:8000",
     api_key="your-mockexchange-key"
 )
@@ -203,36 +203,198 @@ btc_eth_tickers = gateway.fetch_tickers(['BTC/USDT', 'ETH/USDT'])
 For live trading with real exchanges:
 
 ```python
-from mockexchange_gateway import create_prod_gateway
+from mockexchange_gateway import ExchangeFactory
 
 # Production mode (Real Exchange)
-prod_gateway = create_prod_gateway(
+gateway = ExchangeFactory.create_prod_gateway(
     exchange_id="binance",  # or 'coinbase', 'kraken', etc.
     api_key="your-api-key",
     secret="your-secret-key",
     sandbox=True  # Use testnet for safety
 )
+
+# Same interface - your code works unchanged
+ticker = gateway.fetch_ticker("BTC/USDT")
+balance = gateway.fetch_balance()
+order = gateway.create_order("BTC/USDT", "market", "buy", 0.001)
 ```
 
-### Using the Factory Class
+## 🎯 **Best Practices: Seamless Mode Switching**
 
-For more advanced use cases:
+### **1. 📝 Write Exchange-Agnostic Code**
 
 ```python
+def my_trading_strategy(gateway):
+    """This function works with ANY exchange (paper or production)."""
+    
+    # Check capabilities before using features
+    if not gateway.has.get("fetchOHLCV", False):
+        print("OHLCV not available in this mode")
+        return None
+    
+    # Your trading logic - same for both modes
+    ticker = gateway.fetch_ticker("BTC/USDT")
+    balance = gateway.fetch_balance()
+    
+    if ticker["last"] > 50000 and balance["USDT"]["free"] > 100:
+        return gateway.create_order("BTC/USDT", "market", "buy", 0.001)
+    
+    return None
+```
+
+### **2. 🔧 Environment-Based Configuration**
+
+```python
+import os
 from mockexchange_gateway import ExchangeFactory
 
-# Create paper mode gateway
-paper_gateway = ExchangeFactory.create_paper_gateway(
+def create_gateway_for_environment():
+    """Create the right gateway based on environment."""
+    
+    # Use paper mode for development/testing
+    if os.getenv('ENVIRONMENT') in ['development', 'testing']:
+        return ExchangeFactory.create_paper_gateway(
+            base_url=os.getenv('MOCKX_BASE_URL', 'http://localhost:8000'),
+            api_key=os.getenv('MOCKX_API_KEY', 'dev-key')
+        )
+    
+    # Use production mode for live trading
+    else:
+        return ExchangeFactory.create_prod_gateway(
+            exchange_id=os.getenv('EXCHANGE_ID', 'binance'),
+            api_key=os.getenv('EXCHANGE_API_KEY'),
+            secret=os.getenv('EXCHANGE_SECRET'),
+            sandbox=os.getenv('EXCHANGE_SANDBOX', 'true').lower() == 'true'
+        )
+
+# Usage - same code works in all environments
+gateway = create_gateway_for_environment()
+result = my_trading_strategy(gateway)
+```
+
+### **3. 🧪 Testing Strategy**
+
+```python
+def test_strategy_with_paper_mode():
+    """Test your strategy safely with MockExchange."""
+    
+    # Paper mode for testing
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000",
+        api_key="test-key"
+    )
+    
+    # Test your strategy
+    result = my_trading_strategy(gateway)
+    
+    # Verify behavior without real money
+    assert result is not None
+    print("Strategy tested successfully in paper mode")
+
+def test_strategy_with_production_mode():
+    """Test your strategy with real exchange (testnet)."""
+    
+    # Production mode with testnet
+    gateway = ExchangeFactory.create_prod_gateway(
+        exchange_id="binance",
+        api_key="your-testnet-key",
+        secret="your-testnet-secret",
+        sandbox=True  # Use testnet
+    )
+    
+    # Same strategy, real exchange
+    result = my_trading_strategy(gateway)
+    
+    # Verify with real exchange behavior
+    assert result is not None
+    print("Strategy tested successfully with real exchange")
+```
+
+### **4. 🚀 Deployment Workflow**
+
+```python
+# development.py - Local development
+gateway = ExchangeFactory.create_paper_gateway(
     base_url="http://localhost:8000",
     api_key="dev-key"
 )
 
-# Create production mode gateway
-prod_gateway = ExchangeFactory.create_prod_gateway(
-    exchange_id="coinbase",  # or 'binance', 'kraken', etc.
-    api_key="your-exchange-key",
-    secret="your-exchange-secret"
+# staging.py - Pre-production testing
+gateway = ExchangeFactory.create_prod_gateway(
+    exchange_id="binance",
+    api_key="staging-key",
+    secret="staging-secret",
+    sandbox=True  # Testnet
 )
+
+# production.py - Live trading
+gateway = ExchangeFactory.create_prod_gateway(
+    exchange_id="binance",
+    api_key="production-key",
+    secret="production-secret",
+    sandbox=False  # Live trading
+)
+```
+
+### **5. 🛡️ Error Handling Best Practices**
+
+```python
+from mockexchange_gateway import NotSupported, ExchangeError
+
+def robust_trading_function(gateway):
+    """Handle errors gracefully for both modes."""
+    
+    try:
+        # Check capabilities first
+        if not gateway.has.get("fetchOHLCV", False):
+            print("OHLCV not available, using alternative method")
+            # Use alternative approach
+            return None
+        
+        # Try the operation
+        ohlcv = gateway.fetch_ohlcv("BTC/USDT", "1h")
+        return ohlcv
+        
+    except NotSupported as e:
+        print(f"Feature not supported in this mode: {e}")
+        return None
+        
+    except ExchangeError as e:
+        print(f"Exchange error: {e}")
+        return None
+        
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+```
+
+### **6. 📊 Capability Checking**
+
+```python
+def adaptive_trading_strategy(gateway):
+    """Adapt strategy based on available capabilities."""
+    
+    strategy = {
+        "basic_trading": True,
+        "advanced_analysis": False,
+        "risk_management": True
+    }
+    
+    # Check what's available
+    if gateway.has.get("fetchOHLCV", False):
+        strategy["advanced_analysis"] = True
+    
+    if gateway.has.get("fetchOrderBook", False):
+        strategy["order_book_analysis"] = True
+    
+    # Execute strategy based on capabilities
+    if strategy["basic_trading"]:
+        return execute_basic_trading(gateway)
+    
+    if strategy["advanced_analysis"]:
+        return execute_advanced_trading(gateway)
+    
+    return None
 ```
 
 ## ⚙️ Configuration
@@ -264,15 +426,18 @@ For applications that need to switch modes based on environment:
 
 ```python
 import os
-from mockexchange_gateway import create_paper_gateway, create_prod_gateway
+from mockexchange_gateway import ExchangeFactory
 
 # Automatically choose based on environment
 use_mock = os.getenv('ENVIRONMENT') != 'production'
 
 if use_mock:
-    gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+    gateway = ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", 
+        api_key="dev-key"
+    )
 else:
-    gateway = create_prod_gateway(
+    gateway = ExchangeFactory.create_prod_gateway(
         exchange_id="binance",
         api_key=os.getenv('EXCHANGE_API_KEY'),
         secret=os.getenv('EXCHANGE_SECRET')
@@ -438,11 +603,18 @@ def my_trading_strategy(gateway):
     return None
 
 # Test with MockExchange
-paper_gateway = create_paper_gateway(base_url="http://localhost:8000", api_key="dev-key")
+paper_gateway = ExchangeFactory.create_paper_gateway(
+    base_url="http://localhost:8000", 
+    api_key="dev-key"
+)
 result = my_trading_strategy(paper_gateway)
 
 # Deploy to production (same code!)
-prod_gateway = create_prod_gateway("binance", api_key="...", secret="...")
+prod_gateway = ExchangeFactory.create_prod_gateway(
+    exchange_id="binance", 
+    api_key="...", 
+    secret="..."
+)
 result = my_trading_strategy(prod_gateway)
 ```
 
