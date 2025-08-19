@@ -119,6 +119,59 @@ flowchart TD
     style K fill:#d32f2f,color:#ffffff
 ```
 
+## 🧠 Architecture Explained (For Dummies)
+
+The MockX Gateway uses a simple **3-component architecture** that makes it easy to switch between paper trading and live trading:
+
+### **🎭 1. CCXT Facade - "The Universal Translator"**
+**What it does**: This is your main interface. It speaks the same language as CCXT, so your trading strategies don't need to change.
+
+**Why it matters**: Whether you're using MockExchange or Binance, you call the same methods (`fetch_ticker()`, `create_order()`, etc.). The facade translates your requests into the right format for whatever exchange you're using.
+
+**Think of it as**: A universal remote control that works with any TV brand.
+
+### **🏭 2. ExchangeFactory - "The Smart Constructor"**
+**What it does**: This creates the right gateway for your needs. Tell it "paper mode" or "production mode" and it builds everything correctly.
+
+**Why it matters**: You don't need to worry about the complex setup. Just say what you want, and the factory handles all the technical details.
+
+**Think of it as**: A smart assistant that sets up your entire trading desk based on whether you want to practice or trade for real.
+
+### **🧭 3. Capabilities Manager - "The Safety Guard"**
+**What it does**: This tells you what features are available in your current mode. Paper mode has basic features, production mode has everything.
+
+**Why it matters**: Your code can check what's available before trying to use it. No surprises or crashes.
+
+**Think of it as**: A GPS that tells you which roads are open before you start driving.
+
+### **🔄 How They Work Together**
+
+1. **You call the Factory**: `ExchangeFactory.create_paper_gateway()` or `ExchangeFactory.create_prod_gateway()`
+2. **Factory creates the Facade**: Sets up the universal interface with the right backend
+3. **Facade uses Capabilities**: Knows what features are available and handles requests accordingly
+4. **Your code stays the same**: Same methods work in both paper and production modes
+
+### **💡 The Magic**
+
+```python
+# This code works identically in both modes:
+def my_strategy(gateway):
+    ticker = gateway.fetch_ticker("BTC/USDT")  # Same call
+    balance = gateway.fetch_balance()          # Same call
+    order = gateway.create_order(...)          # Same call
+    return order
+
+# Just change how you create the gateway:
+paper_gateway = ExchangeFactory.create_paper_gateway(...)    # Practice mode
+prod_gateway = ExchangeFactory.create_prod_gateway(...)      # Real money mode
+
+# Your strategy works with both:
+my_strategy(paper_gateway)  # Safe testing
+my_strategy(prod_gateway)   # Live trading
+```
+
+**Result**: Write once, test with MockExchange, deploy to real exchanges. No code changes needed! 🎉
+
 ## 🚀 Quick Start
 
 ### Installation
