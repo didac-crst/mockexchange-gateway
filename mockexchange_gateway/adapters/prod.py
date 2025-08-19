@@ -118,8 +118,14 @@ class ProdAdapter:
         return self.exchange.fetch_trades(symbol, since, limit)
 
     # Balance methods
-    def fetch_balance(self) -> Dict[str, Any]:
-        """Fetch account balance."""
+    def fetch_balance(self, asset: Optional[str] = None) -> Dict[str, Any]:
+        """Fetch account balance.
+
+        Args:
+            asset: Optional specific asset to fetch balance for (ignored in production mode)
+        """
+        # In production mode, we ignore the asset parameter and fetch full balance
+        # CCXT doesn't support fetching single asset balance in the same way
         return self.exchange.fetch_balance()
 
     def fetch_positions(self, symbols: Optional[List[str]] = None) -> List[Dict[str, Any]]:
