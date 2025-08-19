@@ -7,12 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from mockexchange_gateway import (
-    MockXFactory,
-    MockXGateway,
-    create_paper_gateway,
-    create_prod_gateway,
-)
+from mockexchange_gateway import ExchangeFactory, MockXGateway
 
 
 class TestFactoryFunctions:
@@ -20,7 +15,7 @@ class TestFactoryFunctions:
 
     def test_create_paper_gateway(self):
         """Test creating a paper mode gateway."""
-        gateway = create_paper_gateway(
+        gateway = ExchangeFactory.create_paper_gateway(
             base_url="http://localhost:8000", api_key="test-key", timeout=5.0
         )
 
@@ -32,7 +27,7 @@ class TestFactoryFunctions:
 
     def test_create_prod_gateway(self):
         """Test creating a production mode gateway."""
-        gateway = create_prod_gateway(
+        gateway = ExchangeFactory.create_prod_gateway(
             exchange_id="binance",
             api_key="test-key",
             secret="test-secret",
@@ -48,7 +43,7 @@ class TestFactoryFunctions:
 
     def test_create_prod_gateway_without_credentials(self):
         """Test creating a production gateway without credentials."""
-        gateway = create_prod_gateway(exchange_id="binance", sandbox=True)
+        gateway = ExchangeFactory.create_prod_gateway(exchange_id="binance", sandbox=True)
 
         assert isinstance(gateway, MockXGateway)
         assert gateway._mode == "prod"
@@ -59,14 +54,14 @@ class TestFactoryFunctions:
     def test_factory_class_methods(self):
         """Test the factory class methods."""
         # Test paper gateway creation
-        gateway1 = MockXFactory.create_paper_gateway(
+        gateway1 = ExchangeFactory.create_paper_gateway(
             base_url="http://localhost:8000", api_key="test-key"
         )
         assert isinstance(gateway1, MockXGateway)
         assert gateway1._mode == "paper"
 
         # Test production gateway creation
-        gateway2 = MockXFactory.create_prod_gateway(
+        gateway2 = ExchangeFactory.create_prod_gateway(
             exchange_id="coinbase", api_key="test-key", secret="test-secret"
         )
         assert isinstance(gateway2, MockXGateway)
@@ -74,7 +69,7 @@ class TestFactoryFunctions:
 
     def test_factory_with_additional_kwargs(self):
         """Test factory functions with additional keyword arguments."""
-        gateway = create_prod_gateway(
+        gateway = ExchangeFactory.create_prod_gateway(
             exchange_id="binance",
             api_key="test-key",
             secret="test-secret",
@@ -93,6 +88,8 @@ class TestFactoryFunctions:
         mock_prod_adapter.side_effect = Exception("Exchange not found")
 
         with pytest.raises(Exception) as exc_info:
-            create_prod_gateway(exchange_id="nonexistent", api_key="test-key", secret="test-secret")
+            ExchangeFactory.create_prod_gateway(
+                exchange_id="nonexistent", api_key="test-key", secret="test-secret"
+            )
 
         assert "Exchange not found" in str(exc_info.value)

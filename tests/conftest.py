@@ -8,7 +8,7 @@ integration tests in the MockX Gateway test suite.
 
 import pytest
 
-from mockexchange_gateway import create_paper_gateway, create_prod_gateway
+from mockexchange_gateway import ExchangeFactory
 from tests.helpers.credentials import get_integration_config
 
 
@@ -42,7 +42,9 @@ def paper_gateway():
     This fixture creates a gateway connected to a test MockExchange instance.
     It's suitable for unit tests that don't require real API credentials.
     """
-    return create_paper_gateway(base_url="http://localhost:8000", api_key="test-key", timeout=5.0)
+    return ExchangeFactory.create_paper_gateway(
+        base_url="http://localhost:8000", api_key="test-key", timeout=5.0
+    )
 
 
 @pytest.fixture
@@ -66,7 +68,7 @@ def integration_paper_gateway(integration_config):
         pytest.skip("Integration credentials not available")
 
     config = integration_config["mockexchange"]
-    return create_paper_gateway(**config)
+    return ExchangeFactory.create_paper_gateway(**config)
 
 
 @pytest.fixture
@@ -80,7 +82,7 @@ def integration_prod_gateway(integration_config):
         pytest.skip("Production mode credentials not available")
 
     config = integration_config["exchange"]
-    return create_prod_gateway(**config)
+    return ExchangeFactory.create_prod_gateway(**config)
 
 
 @pytest.fixture
