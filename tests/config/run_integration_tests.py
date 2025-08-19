@@ -43,10 +43,15 @@ def set_environment_variables():
         if value is not None:
             os.environ[key] = str(value)
             is_secret = any(token in key for token in ("KEY", "SECRET", "TOKEN", "PASSWORD"))
-            display = "[redacted]" if is_secret else (f"{str(value)[:10]}..." if len(str(value)) > 10 else str(value))
+            display = (
+                "[redacted]"
+                if is_secret
+                else (f"{str(value)[:10]}..." if len(str(value)) > 10 else str(value))
+            )
             print(f"✅ Set {key} = {display}")
         else:
             print(f"⚠️  {key} is None (will be skipped)")
+
 
 def run_integration_tests():
     """Run the integration tests."""

@@ -182,6 +182,7 @@ class Capabilities:
             return True
         nested_has = self._capabilities.get("has", {})
         return bool(nested_has.get(feature, False))
+
     def get_has_dict(self) -> Dict[str, bool]:
         """Get the CCXT-style 'has' dict."""
         # Return all capabilities, not just the nested 'has' dict

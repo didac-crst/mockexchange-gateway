@@ -218,7 +218,9 @@ class DataMapper:
 
         # Use UTC to align with CCXT's iso8601 semantics
         from datetime import timezone
+
         return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+
     @staticmethod
     def _datetime_to_timestamp(datetime_str: Optional[str]) -> Optional[int]:
         """Convert ISO datetime string to timestamp."""
