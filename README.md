@@ -111,12 +111,12 @@ flowchart TD
         K
     end
     
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style G fill:#e8f5e8
-    style H fill:#fff3e0
-    style I fill:#ffebee
-    style K fill:#ffebee
+    style A fill:#1976d2,color:#ffffff
+    style B fill:#7b1fa2,color:#ffffff
+    style G fill:#388e3c,color:#ffffff
+    style H fill:#f57c00,color:#ffffff
+    style I fill:#d32f2f,color:#ffffff
+    style K fill:#d32f2f,color:#ffffff
 ```
 
 ## 🚀 Quick Start
