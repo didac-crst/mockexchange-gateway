@@ -216,8 +216,9 @@ class DataMapper:
         if timestamp > 1e12:  # Likely milliseconds
             timestamp = int(timestamp / 1000)
 
-        return datetime.fromtimestamp(timestamp).isoformat()
-
+        # Use UTC to align with CCXT's iso8601 semantics
+        from datetime import timezone
+        return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat().replace("+00:00", "Z")
     @staticmethod
     def _datetime_to_timestamp(datetime_str: Optional[str]) -> Optional[int]:
         """Convert ISO datetime string to timestamp."""
