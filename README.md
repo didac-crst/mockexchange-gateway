@@ -476,6 +476,39 @@ def adaptive_trading_strategy(gateway):
     return None
 ```
 
+### **7. 🎯 When to Use MockX Gateway vs CCXT**
+
+**Goal**: Use the right tool for the right job to avoid capability mismatches and maintain clean architecture.
+
+**Why this matters**: MockX Gateway excels at execution, while CCXT is better for data-heavy operations. This separation keeps your app stable and your trading logic deployment-ready.
+
+```python
+# Use MockX Gateway for EXECUTION & ACCOUNT operations
+# (These are mode-sensitive and benefit from paper/prod switching)
+execution_gateway = ExchangeFactory.create_paper_gateway(...)
+
+# Place orders, check balances, track your trades
+order = execution_gateway.create_order("BTC/USDT", "market", "buy", 0.001)
+balance = execution_gateway.fetch_balance()
+my_trades = execution_gateway.fetch_my_trades("BTC/USDT")
+
+# Use CCXT directly for MARKET DATA operations  
+# (These are data-heavy and benefit from CCXT's broader surface)
+import ccxt
+data_exchange = ccxt.binance()
+
+# OHLCV, order books, bulk data
+ohlcv = data_exchange.fetch_ohlcv("BTC/USDT", "1h", limit=1000)
+orderbook = data_exchange.fetch_order_book("BTC/USDT")
+all_tickers = data_exchange.fetch_tickers()
+```
+
+**Recommended Split:**
+- **MockX Gateway**: `create_order()`, `cancel_order()`, `fetch_balance()`, `fetch_my_trades()`, `fetch_open_orders()`
+- **CCXT Direct**: `fetch_ohlcv()`, `fetch_order_book()`, `fetch_trades()`, bulk symbol discovery
+
+**Result**: One-flag swap for execution, full CCXT breadth for analytics, no capability surprises! 🎯
+
 ## ⚙️ Configuration
 
 ### Constructor-Based Configuration
@@ -976,13 +1009,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [CCXT](https://github.com/ccxt/ccxt) - The inspiration and compatibility target
-- [MockExchange](https://github.com/didac-crst/mockexchange) - The paper trading backend
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/didac-crst/mockexchange-gateway/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/didac-crst/mockexchange-gateway/discussions)
-- **Documentation**: [README](README.md) and inline docstrings
 
 ---
 
