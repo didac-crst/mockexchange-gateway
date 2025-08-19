@@ -101,8 +101,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code formatting** - Applied Ruff formatting across entire codebase
 - **Error handling** - Improved exception specificity in paper adapter
 - **Documentation structure** - Enhanced with proper sections, examples, and navigation
-- **API simplification** - Removed redundant convenience functions, unified under ExchangeFactory
-- **Factory naming** - Changed from MockXFactory to ExchangeFactory for better clarity
 - **README best practices** - Added comprehensive section for seamless mode switching
 - **Release automation** - Simplified to GitHub-based workflow with templates
 
@@ -117,6 +115,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Makefile syntax** - Fixed missing @ prefixes in echo statements
 - **Mermaid diagram readability** - Improved colors and contrast for better visibility
 - **API compatibility** - Ensured full CCXT method signature compliance
+- **Interface consistency** - Fixed ProdAdapter.fetch_balance() method signature to match PaperAdapter
+- **Integration test failures** - Fixed method signature mismatches between adapters
+- **Outdated API references** - Updated all documentation to use ExchangeFactory consistently
+- **GitHub templates** - Fixed outdated API references in issue templates
+- **Examples documentation** - Fixed outdated API references in examples README
 
 ### Removed
 - Old monolithic client structure
