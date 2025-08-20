@@ -10,6 +10,7 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-red.svg)](https://github.com/astral-sh/ruff)
 [![Type checking: mypy](https://img.shields.io/badge/type%20checking-mypy-blue.svg)](https://mypy-lang.org/)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)](https://pre-commit.com/)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/didac-crst/mockexchange-gateway)
 
 ## 📋 Table of Contents
 
